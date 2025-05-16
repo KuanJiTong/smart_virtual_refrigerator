@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "364549358696",
+    "project_id": "smart-virtual-refrigerator",
+    "storage_bucket": "smart-virtual-refrigerator.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:364549358696:android:d8c94ea737b611412ee7dd",
+        "android_client_info": {
+          "package_name": "com.example.smart_virtual_refrigerator"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0L6tZgm_t22ub16W5RlJr1vd4K1O6qFk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
