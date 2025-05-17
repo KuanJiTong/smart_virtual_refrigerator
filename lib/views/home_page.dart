@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../viewmodels/signup_viewmodel.dart';
 import '../views/login_view.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../services/auth_service.dart';
 
 
 class HomePage extends StatelessWidget {
@@ -14,7 +15,8 @@ class HomePage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () async {
-              await FirebaseAuth.instance.signOut(); 
+              final authService = AuthService(); // Or use Provider if you have it set up
+              await authService.signOut();
 
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => LoginView()),

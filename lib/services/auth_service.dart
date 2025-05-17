@@ -48,4 +48,8 @@ class AuthService {
 
     return await _firebaseAuth.signInWithCredential(credential);
   }
+
+  Future<void> signOut() async {
+    await _firebaseAuth.signOut();
+  }
 }
