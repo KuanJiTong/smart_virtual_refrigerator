@@ -1,16 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../services/auth_service.dart';
+
 class SignupViewModel extends ChangeNotifier {
-  String name = '';
   String email = '';
   String password = '';
   bool isChecked = false;
   bool isLoading = false;
-
-  void setName(String val) {
-    name = val;
-    notifyListeners();
-  }
 
   void setEmail(String val) {
     email = val;
@@ -29,28 +26,33 @@ class SignupViewModel extends ChangeNotifier {
     }
   }
 
-
   Future<void> signup() async {
     isLoading = true;
     notifyListeners();
 
-    await Future.delayed(Duration(seconds: 2)); // simulate signup delay
-
-    // Here you can add your actual signup logic, e.g. call to backend
-
-    isLoading = false;
-    notifyListeners();
+    try {
+      await AuthService().signUpWithEmail(email, password);
+    } on FirebaseAuthException catch (e) {
+      isLoading = false;
+      notifyListeners();
+      throw e.message ?? 'An unknown error occurred';
+    } catch (e) {
+      isLoading = false;
+      notifyListeners();
+      throw 'Something went wrong. Please try again.';
+    }
   }
 
-  Future<void> signupWithGoogle() async {
+  Future<bool> signinWithGoogle() async {
     isLoading = true;
+
     notifyListeners();
 
-    await Future.delayed(Duration(seconds: 2)); // simulate google signup
-
-    // Add your Google signup logic here
+    final userCredential = await AuthService().signInWithGoogle();
 
     isLoading = false;
     notifyListeners();
+
+    return userCredential != null;
   }
 }

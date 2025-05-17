@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import './viewmodels/signup_viewmodel.dart';
+import '../viewmodels/signup_viewmodel.dart';
+import 'home_page.dart';
+import 'login_view.dart';
 
 class SignupView extends StatelessWidget {
   final _formKey = GlobalKey<FormState>(); // Key for form validation
@@ -19,6 +21,7 @@ class SignupView extends StatelessWidget {
               'assets/logo.png',
               width: 350,
             ),
+            SizedBox(height: 50),
             Container(
               margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
@@ -65,53 +68,22 @@ class SignupView extends StatelessWidget {
                           ),
                           side: BorderSide(color: Colors.black, width: 1.5),
                         ),
-                        onPressed: vm.signupWithGoogle,
+                        onPressed: () async {
+                          final success = await Provider.of<SignupViewModel>(context, listen: false).signinWithGoogle();
+
+                          if (success) {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (context) => HomePage()),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Google sign-in failed')),
+                            );
+                          }
+                        },
                       ),
                     ),
                     Divider(color: Colors.black),
-                    Text(
-                      "Name",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    TextFormField(
-                      style: TextStyle(
-                        fontSize: 12, // Set your desired font size here
-                      ),
-                      decoration: InputDecoration(
-                        labelText: 'Enter your name',
-                        labelStyle: TextStyle(
-                          fontSize: 12, // Label text size
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(3),
-                          borderSide: BorderSide(
-                            color: Colors.black,
-                            width: 1.5,  // thickness when not focused
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(3),
-                          borderSide: BorderSide(
-                            color: Colors.black,
-                            width: 2.0,  // thickness when focused
-                          ),
-                        ),
-                      ),
-                      onChanged: vm.setName,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your name';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 10),
                     Text(
                       "Email",
                       style: TextStyle(
@@ -126,8 +98,10 @@ class SignupView extends StatelessWidget {
                       decoration: InputDecoration(
                         labelText: 'Enter your email address',
                         labelStyle: TextStyle(
-                          fontSize: 12, // Label text size
+                          fontSize: 12,
+                          color: Colors.black,
                         ),
+
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(3),
                         ),
@@ -169,7 +143,8 @@ class SignupView extends StatelessWidget {
                       decoration: InputDecoration(
                         labelText: 'At least 8 characters',
                         labelStyle: TextStyle(
-                          fontSize: 12, // Label text size
+                          fontSize: 12,
+                          color: Colors.black,
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(3),
@@ -242,9 +217,25 @@ class SignupView extends StatelessWidget {
                       width: double.infinity,
                       child: ElevatedButton(
 
-                        onPressed: () {
+                        onPressed: () async {
                           if (_formKey.currentState!.validate()) {
-                            vm.signup();
+                            if (!vm.isChecked) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('You must agree to the terms and privacy policy')),
+                              );
+                              return;
+                            }
+
+                            try {
+                              await vm.signup();
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(builder: (context) => HomePage()),
+                              );
+                            } catch (error) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(error.toString())),
+                              );
+                            }
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -268,13 +259,20 @@ class SignupView extends StatelessWidget {
                     Center(child: Text("Already have an account?", style: TextStyle(fontSize: 14),)),
                     SizedBox(height: 10),
                     Center(
-                      child: Text(
-                        'Log In',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.underline,
-                          decorationThickness: 2.0
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (context) => LoginView()),
+                          );
+                        },
+                        child: Text(
+                          'Log In',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                            decorationThickness: 2.0,
+                          ),
                         ),
                       ),
                     ),
