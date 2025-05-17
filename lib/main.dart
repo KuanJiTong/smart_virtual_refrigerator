@@ -2,8 +2,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
+
 import '../viewmodels/signup_viewmodel.dart';
+import '../viewmodels/login_viewmodel.dart'; // ✅ Import LoginViewModel
 import '../views/signup_view.dart';
+import '../views/login_view.dart'; // ✅ Import LoginView (optional if needed)
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,39 +19,40 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Smart Virtual Refrigerator',
-      theme: ThemeData(
-        fontFamily: 'Poppins',
-        scaffoldBackgroundColor: Color(0xFFFBFCFE),
-        textSelectionTheme: TextSelectionThemeData(
-          cursorColor: Colors.black,               // The blinking cursor color
-          selectionColor: Colors.black,  // Highlighted text background color
-          selectionHandleColor: Colors.black,     // The selection handles (the circles)
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          labelStyle: TextStyle(
-            fontSize: 12,
-            color: Colors.black,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SignupViewModel()),
+        ChangeNotifierProvider(create: (_) => LoginViewModel()), // ✅ Add this line
+      ],
+      child: MaterialApp(
+        title: 'Smart Virtual Refrigerator',
+        theme: ThemeData(
+          fontFamily: 'Poppins',
+          scaffoldBackgroundColor: Color(0xFFFBFCFE),
+          textSelectionTheme: TextSelectionThemeData(
+            cursorColor: Colors.black,
+            selectionColor: Colors.black,
+            selectionHandleColor: Colors.black,
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            labelStyle: TextStyle(
+              fontSize: 12,
+              color: Colors.black,
+            ),
+          ),
+          checkboxTheme: CheckboxThemeData(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+            side: BorderSide(color: Colors.transparent),
+            fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+              if (states.contains(MaterialState.selected)) {
+                return Colors.black;
+              }
+              return Colors.grey;
+            }),
+            checkColor: MaterialStateProperty.all(Colors.white),
           ),
         ),
-        checkboxTheme: CheckboxThemeData(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-          side: BorderSide(color: Colors.transparent),
-          fillColor: MaterialStateProperty.resolveWith<Color>((states) {
-            if (states.contains(MaterialState.selected)) {
-              return Colors.black; // color when checked
-            }
-            return Colors.grey; // color when unchecked
-          }),
-          checkColor: MaterialStateProperty.all(
-            Colors.white,
-          ), // color of the check mark
-        ),
-      ),
-      home: ChangeNotifierProvider(
-        create: (_) => SignupViewModel(),
-        child: SignupView(),
+        home: SignupView(), // ✅ Change this to LoginView() if you want LoginView to show first
       ),
     );
   }

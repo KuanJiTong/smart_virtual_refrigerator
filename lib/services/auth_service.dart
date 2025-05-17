@@ -19,6 +19,21 @@ class AuthService {
     }
   }
 
+  // Sign in with email & password
+  Future<UserCredential?> signInWithEmail(String email, String password) async {
+    try {
+      UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw e.message ?? 'Login failed';
+    } catch (e) {
+      throw 'An unknown error occurred';
+    }
+  }
+
   signInWithGoogle() async {
     final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
 

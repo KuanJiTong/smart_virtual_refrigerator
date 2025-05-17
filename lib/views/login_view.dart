@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/signup_viewmodel.dart';
+import '../viewmodels/login_viewmodel.dart';
 import 'home_page.dart';
+import 'signup_view.dart';
 
 class LoginView extends StatelessWidget {
   final _formKey = GlobalKey<FormState>(); // Key for form validation
 
   @override
   Widget build(BuildContext context) {
+    final vm = Provider.of<LoginViewModel>(context);
 
     return Scaffold(
       body: Padding(
@@ -41,13 +43,170 @@ class LoginView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Login",
+                      "Log In",
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: Image.asset(
+                          'assets/google_logo.png',
+                          height: 13,
+                        ),
+                        label: Text(
+                          'Log In with Google',
+                          style: TextStyle(color: Colors.black, fontSize: 12),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                          side: BorderSide(color: Colors.black, width: 1.5),
+                        ),
+                        onPressed: () async {
+                          final success = await Provider.of<LoginViewModel>(context, listen: false).signinWithGoogle();
 
+                          if (success) {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (context) => HomePage()),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Google sign-in failed')),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                    Divider(color: Colors.black),
+                    Text(
+                      "Email",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextFormField(
+                      style: TextStyle(fontSize: 12),
+                      decoration: InputDecoration(
+                        labelText: 'Enter your email address',
+                        labelStyle: TextStyle(fontSize: 12, color: Colors.black),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(3),
+                          borderSide: BorderSide(color: Colors.black, width: 1.5),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(3),
+                          borderSide: BorderSide(color: Colors.black, width: 2.0),
+                        ),
+                      ),
+                      onChanged: vm.setEmail,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      "Password",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextFormField(
+                      style: TextStyle(fontSize: 12),
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: 'Enter your password',
+                        labelStyle: TextStyle(fontSize: 12, color: Colors.black),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(3),
+                          borderSide: BorderSide(color: Colors.black, width: 1.5),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(3),
+                          borderSide: BorderSide(color: Colors.black, width: 2.0),
+                        ),
+                      ),
+                      onChanged: vm.setPassword,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            try {
+                              await vm.login();
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(builder: (context) => HomePage()),
+                              );
+                            } catch (error) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(error.toString())),
+                              );
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          backgroundColor: Color(0xFFFFE633),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                        child: Text(
+                          'Log In',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Divider(color: Colors.black),
+                    Center(child: Text("Don't have an account?", style: TextStyle(fontSize: 14))),
+                    SizedBox(height: 10),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (context) => SignupView()),
+                          );
+                        },
+                        child: Text(
+                          'Sign Up',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                            decorationThickness: 2.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10),
                   ],
                 ),
               ),
