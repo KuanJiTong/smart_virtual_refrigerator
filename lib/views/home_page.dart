@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/signup_viewmodel.dart';
 import '../views/login_view.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class HomePage extends StatelessWidget {
   @override
@@ -11,14 +13,11 @@ class HomePage extends StatelessWidget {
         title: Text("Home Page"),
         actions: [
           TextButton(
-            onPressed: () {
-              // Add your sign-out logic here
-              // You may want to use FirebaseAuth or your own AuthService to sign out
-              // Example: FirebaseAuth.instance.signOut();
-              
-              // You could navigate to the login screen after sign-out
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut(); 
+
               Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => LoginView()), // Navigate back to login view
+                MaterialPageRoute(builder: (context) => LoginView()),
               );
             },
             child: Text(
