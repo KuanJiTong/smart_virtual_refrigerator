@@ -4,9 +4,9 @@ import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
 import '../viewmodels/signup_viewmodel.dart';
-import '../viewmodels/login_viewmodel.dart'; // ✅ Import LoginViewModel
+import '../viewmodels/login_viewmodel.dart';
 import '../views/signup_view.dart';
-import '../views/login_view.dart'; // ✅ Import LoginView (optional if needed)
+import '../views/login_view.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SignupViewModel()),
-        ChangeNotifierProvider(create: (_) => LoginViewModel()), // ✅ Add this line
+        ChangeNotifierProvider(create: (_) => LoginViewModel()), 
       ],
       child: MaterialApp(
         title: 'Smart Virtual Refrigerator',
@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
             checkColor: MaterialStateProperty.all(Colors.white),
           ),
         ),
-        home: SignupView(), // ✅ Change this to LoginView() if you want LoginView to show first
+        home: SignupView(), 
       ),
     );
   }
