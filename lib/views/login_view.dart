@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_virtual_refrigerator/views/forgot_password_view.dart';
 import '../viewmodels/login_viewmodel.dart';
 import 'home_page.dart';
 import 'signup_view.dart';
 
-class LoginView extends StatelessWidget {
+class LoginView extends StatefulWidget {
+  @override
+  _LoginViewState createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<LoginView> {
   final _formKey = GlobalKey<FormState>(); // Key for form validation
 
   @override
@@ -150,7 +156,29 @@ class LoginView extends StatelessWidget {
                         return null;
                       },
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        GestureDetector(
+                          onTap:(){
+                            Navigator.push(context,
+                              MaterialPageRoute(builder: (context){
+                                return ForgotPasswordView();
+                              })
+                            );
+                          },
+                          child: Text('Forgot Password?',
+                          style: TextStyle(
+                              fontSize: 12, 
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold 
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(

@@ -1,5 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/forgot_password_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/views/forgot_password_view.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
@@ -23,6 +25,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => SignupViewModel()),
         ChangeNotifierProvider(create: (_) => LoginViewModel()), 
+        ChangeNotifierProvider(create: (_) => ForgotPasswordViewModel()), 
       ],
       child: MaterialApp(
         title: 'Smart Virtual Refrigerator',
@@ -52,7 +55,7 @@ class MyApp extends StatelessWidget {
             checkColor: MaterialStateProperty.all(Colors.white),
           ),
         ),
-        home: SignupView(), 
+        home: LoginView(), 
       ),
     );
   }

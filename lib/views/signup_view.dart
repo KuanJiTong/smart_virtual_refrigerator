@@ -4,7 +4,12 @@ import '../viewmodels/signup_viewmodel.dart';
 import 'home_page.dart';
 import 'login_view.dart';
 
-class SignupView extends StatelessWidget {
+class SignupView extends StatefulWidget {
+  @override
+  _SignupViewState createState() => _SignupViewState();
+}
+
+class _SignupViewState extends State<SignupView> {
   final _formKey = GlobalKey<FormState>(); // Key for form validation
 
   @override
@@ -73,7 +78,7 @@ class SignupView extends StatelessWidget {
 
                           if (success) {
                             Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (context) => HomePage()),
+                              MaterialPageRoute(builder: (context) => LoginView()),
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -229,7 +234,7 @@ class SignupView extends StatelessWidget {
                             try {
                               await vm.signup();
                               Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(builder: (context) => HomePage()),
+                                MaterialPageRoute(builder: (context) => LoginView()),
                               );
                             } catch (error) {
                               ScaffoldMessenger.of(context).showSnackBar(
