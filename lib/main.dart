@@ -1,13 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/forgot_password_viewmodel.dart';
-import 'package:smart_virtual_refrigerator/views/forgot_password_view.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
 import '../viewmodels/signup_viewmodel.dart';
 import '../viewmodels/login_viewmodel.dart';
-import '../views/signup_view.dart';
 import '../views/login_view.dart'; 
 
 void main() async {
@@ -55,6 +53,7 @@ class MyApp extends StatelessWidget {
             checkColor: MaterialStateProperty.all(Colors.white),
           ),
         ),
+        debugShowCheckedModeBanner: false,
         home: LoginView(), 
       ),
     );

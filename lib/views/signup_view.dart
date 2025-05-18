@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/signup_viewmodel.dart';
-import 'home_page.dart';
 import 'login_view.dart';
 
 class SignupView extends StatefulWidget {
+  const SignupView({super.key});
+
   @override
-  _SignupViewState createState() => _SignupViewState();
+  SignupViewState createState() => SignupViewState();
 }
 
-class _SignupViewState extends State<SignupView> {
+class SignupViewState extends State<SignupView> {
   final _formKey = GlobalKey<FormState>(); // Key for form validation
 
   @override

@@ -6,11 +6,13 @@ import 'home_page.dart';
 import 'signup_view.dart';
 
 class LoginView extends StatefulWidget {
+  const LoginView({super.key});
+
   @override
-  _LoginViewState createState() => _LoginViewState();
+  LoginViewState createState() => LoginViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class LoginViewState extends State<LoginView> {
   final _formKey = GlobalKey<FormState>(); // Key for form validation
 
   @override

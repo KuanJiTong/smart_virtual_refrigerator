@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/signup_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/login_viewmodel.dart';
 import '../views/login_view.dart'; 
-import '../viewmodels/login_viewmodel.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
-
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<LoginViewModel>(context, listen: false);
+    final signout = Provider.of<LoginViewModel>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
@@ -22,7 +19,7 @@ class HomePage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.black),
             onPressed: () async {
-              await AuthService().signOut();
+              await signout.signOut();
 
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => LoginView()),
