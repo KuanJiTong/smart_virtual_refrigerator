@@ -51,16 +51,16 @@ class LoginViewModel extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
-  isLoading = true;
-  notifyListeners();
+    isLoading = true;
+      notifyListeners();
 
-  try {
-    await AuthService().signOut();
-  } catch (e) {
-    // Optional: handle error or show message
+    try {
+      await AuthService().signOut();
+    } catch (e) {
+      // Optional: handle error or show message
+    }
+
+    isLoading = false;
+    notifyListeners();
   }
-
-  isLoading = false;
-  notifyListeners();
-}
 }
