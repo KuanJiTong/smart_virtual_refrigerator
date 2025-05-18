@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/login_viewmodel.dart';
 import '../views/login_view.dart'; 
-import '../../services/auth_service.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
