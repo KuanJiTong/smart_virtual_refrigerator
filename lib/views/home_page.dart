@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/signup_viewmodel.dart';
 import '../views/login_view.dart'; 
+import '../viewmodels/login_viewmodel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
 
@@ -9,14 +10,15 @@ import '../../services/auth_service.dart';
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final vm = Provider.of<LoginViewModel>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Home Page"),
         actions: [
           TextButton(
             onPressed: () async {
-              final authService = AuthService(); // Or use Provider if you have it set up
-              await authService.signOut();
+              await vm.signOut();
 
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => LoginView()),
@@ -38,7 +40,6 @@ class HomePage extends StatelessWidget {
               'assets/logo.png',
               width: 350,
             ),
-            // Add any additional content you want here
           ],
         ),
       ),
