@@ -49,4 +49,18 @@ class LoginViewModel extends ChangeNotifier {
 
     return userCredential != null;
   }
+
+  Future<void> signOut() async {
+  isLoading = true;
+  notifyListeners();
+
+  try {
+    await AuthService().signOut();
+  } catch (e) {
+    // Optional: handle error or show message
+  }
+
+  isLoading = false;
+  notifyListeners();
+}
 }
