@@ -66,6 +66,11 @@ flutter:
   assets:
     - assets/logo.png
     - assets/google_logo.png
+    - assets/chicken_rice.jpg
+    - assets/sushi.jpg
+    - assets/potatoes.jpg
+    - assets/massimo.jpg
+
 
   fonts:
     - family: Poppins
