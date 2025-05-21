@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/signup_viewmodel.dart';
+import 'home_page.dart';
 import 'login_view.dart';
 
 class SignupView extends StatefulWidget {
@@ -79,7 +80,7 @@ class SignupViewState extends State<SignupView> {
 
                           if (success) {
                             Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (context) => LoginView()),
+                              MaterialPageRoute(builder: (context) => HomePage()),
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(

@@ -35,6 +35,7 @@ class AuthService {
   }
 
   signInWithGoogle() async {
+
     final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
 
     if(gUser == null) return;
