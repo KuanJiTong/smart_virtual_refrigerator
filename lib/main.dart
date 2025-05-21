@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import '../viewmodels/signup_viewmodel.dart';
 import '../viewmodels/login_viewmodel.dart';
 import '../views/login_view.dart'; 
+import '../views/fridge_page.dart'; // Make sure this path is correct
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,7 +57,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         debugShowCheckedModeBanner: false,
-        home: LoginView(), 
+        home: FridgePage(), 
       ),
     );
   }
