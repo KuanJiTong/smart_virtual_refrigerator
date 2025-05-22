@@ -248,7 +248,12 @@ class FridgeViewBody extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            overflow: TextOverflow.ellipsis, // <-- Truncate with "..."
+            maxLines: 1, // <-- Ensure it doesn't exceed 1 line
+          ),
           Text(date, style: const TextStyle(color: Colors.grey, fontSize: 12)),
         ],
       ),
@@ -273,9 +278,21 @@ class FridgeViewBody extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(child: Image.asset(imagePath, height: 48)),
+          Center(
+            child: Image.asset(
+              imagePath, 
+              height: 35,
+              width: 35,  
+              fit: BoxFit.contain,
+              ),
+            ),
           const SizedBox(height: 8),
-          Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            name,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+            overflow: TextOverflow.ellipsis, // <-- Truncate with "..."
+            maxLines: 1, // <-- Ensure it doesn't exceed 1 line
+          ),
           Text('Qty: $quantity'),
           Text('Expires: $expiredDate'),
           Text('Days left: $daysLeftToExpire',
