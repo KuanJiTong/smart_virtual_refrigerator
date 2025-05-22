@@ -9,14 +9,43 @@ class FridgePage extends StatefulWidget {
 
 class _FridgePageState extends State<FridgePage> {
   String selectedCategory = 'All';
-
-  final List<Map<String, String>> allIngredients = [
-    {'category': 'Vegetables', 'image': 'assets/potatoes.jpg', 'quantity': '600g'},
-    {'category': 'Meat', 'image': 'assets/massimo.jpg', 'quantity': '12pcs'},
-    {'category': 'Fruit', 'image': 'assets/apple.jpg', 'quantity': '2 pcs'},
+  List<Map<String, dynamic>> allIngredients = [
+    {'category': 'Vegetables', 'image': 'potatoes.jpg', 'quantity': '600g'},
+    {'category': 'Meat', 'image': 'massimo.jpg', 'quantity': '12pcs'},
+    {'category': 'Meat', 'image': 'massimo.jpg', 'quantity': '12pcs'},
+    {'category': 'Meat', 'image': 'massimo.jpg', 'quantity': '12pcs'},
+    {'category': 'Meat', 'image': 'massimo.jpg', 'quantity': '12pcs'},
+    {'category': 'Meat', 'image': 'massimo.jpg', 'quantity': '12pcs'},
   ];
+  List<Map<String, dynamic>> allLeftovers = [
+    {
+      'image': 'chicken_rice.jpg',
+      'title': 'Chicken breast',
+      'date': '17/04/25',
+      'quantity': 2
+    },
+    {
+      'image': 'sushi.jpg',
+      'title': 'Sushi rolls',
+      'date': '26/04/25',
+      'quantity': 3
+    },
+    {
+      'image': 'sushi.jpg',
+      'title': 'Sushi rolls',
+      'date': '26/04/25',
+      'quantity': 3
+    },
+    {
+      'image': 'sushi.jpg',
+      'title': 'Sushi rolls',
+      'date': '26/04/25',
+      'quantity': 3
+    },
+  ];
+  bool isLoading = false;
 
-  List<Map<String, String>> get filteredIngredients {
+  List<Map<String, dynamic>> get filteredIngredients {
     if (selectedCategory == 'All') {
       return allIngredients;
     } else {
@@ -39,100 +68,96 @@ class _FridgePageState extends State<FridgePage> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ListView(
-            children: [
-              // Search Bar
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search ingredient',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Leftovers Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text('Leftovers',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  Text('5 items', style: TextStyle(color: Colors.grey)),
-                ],
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 150,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: ListView(
-                  scrollDirection: Axis.horizontal,
                   children: [
-                    _leftoverCard(
-                      imagePath: 'assets/chicken_rice.jpg',
-                      title: 'Chicken breast with rice',
-                      date: '17/04/25',
-                      quantity: 2,
+                    // Search Bar
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search ingredient',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
                     ),
-                    _leftoverCard(
-                      imagePath: 'assets/sushi.jpg',
-                      title: 'Sushi rolls',
-                      date: '26/04/25',
-                      quantity: 4,
+                    const SizedBox(height: 20),
+
+                    // Leftovers Section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Leftovers',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        Text('${allLeftovers.length} items', style: const TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 150,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: allLeftovers.map((leftover) {
+                          return _leftoverCard(
+                            imagePath: 'assets/${leftover['image']}',
+                            title: leftover['title'],
+                            date: leftover['date'],
+                            quantity: leftover['quantity'],
+                          );
+                        }).toList(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Ingredients Section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Ingredients',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        Text('${filteredIngredients.length} items',
+                            style: const TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: ['All', 'Vegetables', 'Fruit', 'Meat'].map((label) {
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedCategory = label;
+                            });
+                          },
+                          child: _ingredientFilter(
+                            label: label,
+                            isSelected: selectedCategory == label,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: filteredIngredients.map((ingredient) {
+                        return SizedBox(
+                          width: (MediaQuery.of(context).size.width - 56) / 2,
+                          child: _ingredientCard(
+                            'assets/${ingredient['image']}',
+                            ingredient['quantity'],
+                          ),
+                        );
+                      }).toList(),
                     ),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 24),
-
-              // Ingredients Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Ingredients',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  Text('${filteredIngredients.length} items',
-                      style: const TextStyle(color: Colors.grey)),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: ['All', 'Vegetables', 'Fruit', 'Meat'].map((label) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedCategory = label;
-                      });
-                    },
-                    child: _ingredientFilter(
-                      label: label,
-                      isSelected: selectedCategory == label,
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: filteredIngredients.map((ingredient) {
-                  return SizedBox(
-                    width: (MediaQuery.of(context).size.width - 56) / 2, // 16+16+12 spacing
-                    child: _ingredientCard(
-                      ingredient['image']!,
-                      ingredient['quantity']!,
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
@@ -174,20 +199,9 @@ class _FridgePageState extends State<FridgePage> {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-          Text(
-            date,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 12,
-            ),
-          ),
+          Text(title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text(date, style: const TextStyle(color: Colors.grey, fontSize: 12)),
         ],
       ),
     );
@@ -219,8 +233,7 @@ class _FridgePageState extends State<FridgePage> {
           Image.asset(imagePath, height: 48),
           const SizedBox(height: 8),
           Text(quantity,
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 16)),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         ],
       ),
     );
