@@ -167,6 +167,46 @@ class FridgeViewBody extends StatelessWidget {
                 ),
               ),
             ),
+
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  builder: (context) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Wrap(
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.food_bank),
+                            title: const Text('Add Leftovers'),
+                            onTap: () {
+                              Navigator.pop(context);
+                              // Add your navigation or logic here
+                              print('Add Leftovers tapped');
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.qr_code_scanner),
+                            title: const Text('Scan Barcode'),
+                            onTap: () {
+                              Navigator.pop(context);
+                              // Add your navigation or logic here
+                              print('Scan Barcode tapped');
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+              backgroundColor: Colors.black,
+              child: const Icon(Icons.add, color: Colors.white),
+            ),
     );
   }
 
