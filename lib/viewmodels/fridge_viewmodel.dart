@@ -139,7 +139,15 @@ class FridgeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-
+  void clearFilters() {
+    selectedCategory = 'All';
+    expiryFilter = ExpiryFilter.all;
+    quantityFilter = QuantityFilter.all;
+    sortOrder = SortOrder.nameAZ;
+    searchKeyword = '';
+    notifyListeners();
+  }
+  
   void setLoading(bool loading) {
     isLoading = loading;
     notifyListeners();

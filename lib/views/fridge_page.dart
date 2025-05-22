@@ -302,7 +302,7 @@ class FridgeViewBody extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterSheet(BuildContext context, FridgeViewModel vm) {
+  Widget _buildFilterSheet(BuildContext context, FridgeViewModel vm) {  
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView(
@@ -363,9 +363,25 @@ class FridgeViewBody extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Apply Filters'),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Apply Filters'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    vm.clearFilters();
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Clear Filters'),
+                ),
+              ),
+            ],
           ),
         ],
       ),
