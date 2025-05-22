@@ -1,60 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../viewmodels/fridge_viewmodel.dart';
+import 'leftovers_page.dart';
 
-class FridgePage extends StatefulWidget {
+class FridgePage extends StatelessWidget {
   const FridgePage({super.key});
 
   @override
-  State<FridgePage> createState() => _FridgePageState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => FridgeViewModel(),
+      child: const FridgeViewBody(),
+    );
+  }
 }
 
-class _FridgePageState extends State<FridgePage> {
-  String selectedCategory = 'All';
-  List<Map<String, dynamic>> allIngredients = [
-    {'category': 'Vegetables', 'image': 'potatoes.jpg', 'quantity': '600g'},
-    {'category': 'Meat', 'image': 'massimo.jpg', 'quantity': '12pcs'},
-    {'category': 'Meat', 'image': 'massimo.jpg', 'quantity': '12pcs'},
-    {'category': 'Meat', 'image': 'massimo.jpg', 'quantity': '12pcs'},
-    {'category': 'Meat', 'image': 'massimo.jpg', 'quantity': '12pcs'},
-    {'category': 'Meat', 'image': 'massimo.jpg', 'quantity': '12pcs'},
-  ];
-  List<Map<String, dynamic>> allLeftovers = [
-    {
-      'image': 'chicken_rice.jpg',
-      'title': 'Chicken breast',
-      'date': '17/04/25',
-      'quantity': 2
-    },
-    {
-      'image': 'sushi.jpg',
-      'title': 'Sushi rolls',
-      'date': '26/04/25',
-      'quantity': 3
-    },
-    {
-      'image': 'sushi.jpg',
-      'title': 'Sushi rolls',
-      'date': '26/04/25',
-      'quantity': 3
-    },
-    {
-      'image': 'sushi.jpg',
-      'title': 'Sushi rolls',
-      'date': '26/04/25',
-      'quantity': 3
-    },
-  ];
-  bool isLoading = false;
-
-  List<Map<String, dynamic>> get filteredIngredients {
-    if (selectedCategory == 'All') {
-      return allIngredients;
-    } else {
-      return allIngredients.where((item) => item['category'] == selectedCategory).toList();
-    }
-  }
+class FridgeViewBody extends StatelessWidget {
+  const FridgeViewBody({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final vm = Provider.of<FridgeViewModel>(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -68,7 +35,7 @@ class _FridgePageState extends State<FridgePage> {
           ),
         ],
       ),
-      body: isLoading
+      body: vm.isLoading
           ? const Center(child: CircularProgressIndicator())
           : SafeArea(
               child: Padding(
@@ -87,21 +54,36 @@ class _FridgePageState extends State<FridgePage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Leftovers Section
+                    // Leftovers
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Leftovers',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                        Text('${allLeftovers.length} items', style: const TextStyle(color: Colors.grey)),
+                        const Text('Leftovers', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        Row(
+                          children: [
+                            Text('${vm.allLeftovers.length} items', style: const TextStyle(color: Colors.grey)),
+                            if (vm.allLeftovers.length > 3)
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => const LeftoversPage()),
+                                  );
+                                },
+                                child: const Text('View All'),
+                              ),
+                          ],
+                        ),
                       ],
                     ),
+                 
+
                     const SizedBox(height: 12),
                     SizedBox(
                       height: 150,
                       child: ListView(
                         scrollDirection: Axis.horizontal,
-                        children: allLeftovers.map((leftover) {
+                        children: vm.allLeftovers.map((leftover) {
                           return _leftoverCard(
                             imagePath: 'assets/${leftover['image']}',
                             title: leftover['title'],
@@ -114,14 +96,12 @@ class _FridgePageState extends State<FridgePage> {
 
                     const SizedBox(height: 24),
 
-                    // Ingredients Section
+                    // Ingredients
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Ingredients',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                        Text('${filteredIngredients.length} items',
-                            style: const TextStyle(color: Colors.grey)),
+                        const Text('Ingredients', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        Text('${vm.filteredIngredients.length} items', style: const TextStyle(color: Colors.grey)),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -129,13 +109,11 @@ class _FridgePageState extends State<FridgePage> {
                       children: ['All', 'Vegetables', 'Fruit', 'Meat'].map((label) {
                         return GestureDetector(
                           onTap: () {
-                            setState(() {
-                              selectedCategory = label;
-                            });
+                            vm.setCategory(label);
                           },
                           child: _ingredientFilter(
                             label: label,
-                            isSelected: selectedCategory == label,
+                            isSelected: vm.selectedCategory == label,
                           ),
                         );
                       }).toList(),
@@ -144,7 +122,7 @@ class _FridgePageState extends State<FridgePage> {
                     Wrap(
                       spacing: 12,
                       runSpacing: 12,
-                      children: filteredIngredients.map((ingredient) {
+                      children: vm.filteredIngredients.map((ingredient) {
                         return SizedBox(
                           width: (MediaQuery.of(context).size.width - 56) / 2,
                           child: _ingredientCard(
@@ -199,8 +177,12 @@ class _FridgePageState extends State<FridgePage> {
             ],
           ),
           const SizedBox(height: 8),
-          Text(title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           Text(date, style: const TextStyle(color: Colors.grey, fontSize: 12)),
         ],
       ),
@@ -232,8 +214,7 @@ class _FridgePageState extends State<FridgePage> {
         children: [
           Image.asset(imagePath, height: 48),
           const SizedBox(height: 8),
-          Text(quantity,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(quantity, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         ],
       ),
     );
