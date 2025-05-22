@@ -42,19 +42,41 @@ class FridgeViewBody extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: ListView(
                   children: [
-                    // Search Bar
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search ingredient',
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
+                    // Search bar + filter button
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Search ingredient',
+                              prefixIcon: const Icon(Icons.search),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            onChanged: (value) {
+                              vm.setSearchKeyword(value);
+                            },
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        IconButton(
+                          icon: const Icon(Icons.filter_list),
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                              ),
+                              builder: (context) => _buildFilterSheet(context, vm),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 20),
 
-                    // Leftovers
+                    // Leftovers Section
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -76,8 +98,6 @@ class FridgeViewBody extends StatelessWidget {
                         ),
                       ],
                     ),
-                 
-
                     const SizedBox(height: 12),
                     SizedBox(
                       height: 150,
@@ -96,7 +116,7 @@ class FridgeViewBody extends StatelessWidget {
 
                     const SizedBox(height: 24),
 
-                    // Ingredients
+                    // Ingredients Section
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -104,31 +124,42 @@ class FridgeViewBody extends StatelessWidget {
                         Text('${vm.filteredIngredients.length} items', style: const TextStyle(color: Colors.grey)),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: ['All', 'Vegetables', 'Fruit', 'Meat'].map((label) {
-                        return GestureDetector(
-                          onTap: () {
-                            vm.setCategory(label);
-                          },
-                          child: _ingredientFilter(
-                            label: label,
-                            isSelected: vm.selectedCategory == label,
-                          ),
+                    const SizedBox(height: 16),
+
+                    // Category Filter Chips
+                    Wrap(
+                      spacing: 8,
+                      children: ['All', 'Vegetables', 'Fruit', 'Meat'].map((category) {
+                        return ChoiceChip(
+                          label: Text(category),
+                          selected: vm.selectedCategory == category,
+                          onSelected: (_) => vm.setCategory(category),
                         );
                       }).toList(),
                     ),
+
                     const SizedBox(height: 16),
+
                     Wrap(
                       spacing: 12,
                       runSpacing: 12,
                       children: vm.filteredIngredients.map((ingredient) {
-                        return SizedBox(
-                          width: (MediaQuery.of(context).size.width - 56) / 2,
-                          child: _ingredientCard(
-                            'assets/${ingredient['image']}',
-                            ingredient['quantity'],
-                          ),
+                        return LayoutBuilder(
+                          builder: (context, constraints) {
+                            final screenWidth = MediaQuery.of(context).size.width;
+                            final cardWidth = (screenWidth - 48) / 2;
+
+                            return SizedBox(
+                              width: cardWidth,
+                              child: _ingredientCard(
+                                imagePath: 'assets/${ingredient['image']}',
+                                quantity: ingredient['quantity'],
+                                name: ingredient['name'],
+                                expiredDate: ingredient['expiredDate'],
+                                daysLeftToExpire: ingredient['daysLeftToExpire'],
+                              ),
+                            );
+                          },
                         );
                       }).toList(),
                     ),
@@ -177,33 +208,22 @@ class FridgeViewBody extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           Text(date, style: const TextStyle(color: Colors.grey, fontSize: 12)),
         ],
       ),
     );
   }
 
-  Widget _ingredientFilter({required String label, bool isSelected = false}) {
+  Widget _ingredientCard({
+    required String imagePath,
+    required String quantity,
+    required String name,
+    required String expiredDate,
+    required int daysLeftToExpire,
+  }) {
     return Container(
-      margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: isSelected ? Colors.yellow : Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(label),
-    );
-  }
-
-  Widget _ingredientCard(String imagePath, String quantity) {
-    return Container(
-      height: 120,
+      height: 150,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.grey.shade100,
@@ -211,10 +231,85 @@ class FridgeViewBody extends StatelessWidget {
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(imagePath, height: 48),
+          Center(child: Image.asset(imagePath, height: 48)),
           const SizedBox(height: 8),
-          Text(quantity, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text('Qty: $quantity'),
+          Text('Expires: $expiredDate'),
+          Text('Days left: $daysLeftToExpire',
+              style: TextStyle(color: daysLeftToExpire <= 1 ? Colors.red : Colors.black)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterSheet(BuildContext context, FridgeViewModel vm) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          const Text('Filters', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+
+          const SizedBox(height: 16),
+          const Text('Expiry'),
+          Wrap(
+            spacing: 8,
+            children: ExpiryFilter.values.map((filter) {
+              return ChoiceChip(
+                label: Text(filter == ExpiryFilter.all ? 'All' : 'Expiring Soon'),
+                selected: vm.expiryFilter == filter,
+                onSelected: (_) => vm.setExpiryFilter(filter),
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 16),
+          const Text('Quantity'),
+          Wrap(
+            spacing: 8,
+            children: QuantityFilter.values.map((filter) {
+              return ChoiceChip(
+                label: Text(filter == QuantityFilter.all ? 'All' : 'Low Stock'),
+                selected: vm.quantityFilter == filter,
+                onSelected: (_) => vm.setQuantityFilter(filter),
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 16),
+          const Text('Sort By'),
+          Wrap(
+            spacing: 8,
+            children: SortOrder.values.map((order) {
+              String label;
+              switch (order) {
+                case SortOrder.nameAZ:
+                  label = 'Name A-Z';
+                  break;
+                case SortOrder.expirySoonest:
+                  label = 'Expiry Soonest';
+                  break;
+                case SortOrder.quantityHighToLow:
+                  label = 'Quantity High → Low';
+                  break;
+              }
+
+              return ChoiceChip(
+                label: Text(label),
+                selected: vm.sortOrder == order,
+                onSelected: (_) => vm.setSortOrder(order),
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Apply Filters'),
+          ),
         ],
       ),
     );

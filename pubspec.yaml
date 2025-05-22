@@ -70,6 +70,7 @@ flutter:
     - assets/sushi.jpg
     - assets/potatoes.jpg
     - assets/massimo.jpg
+    - assets/bananas.jpg
 
 
   fonts:
