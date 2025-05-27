@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/add_ingredients_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/forgot_password_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/fridge_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/views/add_ingredients_barcode_view.dart';
 import 'package:smart_virtual_refrigerator/views/add_ingredients_view.dart';
 import 'firebase_options.dart';
@@ -9,7 +10,9 @@ import 'package:provider/provider.dart';
 
 import '../viewmodels/signup_viewmodel.dart';
 import '../viewmodels/login_viewmodel.dart';
-import '../views/login_view.dart';
+import '../views/login_view.dart'; 
+import '../views/fridge_page.dart'; 
+import '../views/home_page.dart'; 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
@@ -35,8 +38,9 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SignupViewModel()),
-        ChangeNotifierProvider(create: (_) => LoginViewModel()),
-        ChangeNotifierProvider(create: (_) => ForgotPasswordViewModel()),
+        ChangeNotifierProvider(create: (_) => LoginViewModel()), 
+        ChangeNotifierProvider(create: (_) => ForgotPasswordViewModel()), 
+        ChangeNotifierProvider(create: (_) => FridgeViewModel()),
         ChangeNotifierProvider(create: (_) => IngredientViewModel()),
       ],
       child: MaterialApp(
@@ -69,7 +73,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         debugShowCheckedModeBanner: false,
-        home: AddIngredientsBarcodeView(),
+        home: SignupView(),
       ),
     );
   }
