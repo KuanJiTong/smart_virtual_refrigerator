@@ -1,16 +1,28 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/forgot_password_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/views/add_ingredients_barcode_view.dart';
+import 'package:smart_virtual_refrigerator/views/add_ingredients_view.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
 import '../viewmodels/signup_viewmodel.dart';
 import '../viewmodels/login_viewmodel.dart';
-import '../views/login_view.dart'; 
+import '../views/login_view.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() async {
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    print('Could not load .env: $e');
+  }
+
   runApp(const MyApp());
 }
 
@@ -27,6 +39,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Smart Virtual Refrigerator',
+        navigatorObservers: [routeObserver],
         theme: ThemeData(
           fontFamily: 'Poppins',
           scaffoldBackgroundColor: Color(0xFFFBFCFE),
@@ -54,7 +67,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         debugShowCheckedModeBanner: false,
-        home: LoginView(), 
+        home: AddIngredientsBarcodeView(),
       ),
     );
   }

@@ -4,13 +4,19 @@ import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class AddIngredientsView extends StatefulWidget {
+import '../main.dart';
+import 'add_ingredients_view.dart';
+
+class AddIngredientsBarcodeView extends StatefulWidget {
   @override
-  _AddIngredientsViewState createState() => _AddIngredientsViewState();
+  _AddIngredientsBarcodeViewState createState() => _AddIngredientsBarcodeViewState();
 }
 
-class _AddIngredientsViewState extends State<AddIngredientsView> {
+class _AddIngredientsBarcodeViewState extends State<AddIngredientsBarcodeView> with RouteAware {
   CameraController? _controller;
   List<CameraDescription>? _cameras;
   late BarcodeScanner _barcodeScanner;
@@ -28,6 +34,38 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
       BarcodeFormat.ean8
     ]);
     _initializeCamera();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)! as PageRoute);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    _controller?.dispose();
+    _barcodeScanner.close();
+    super.dispose();
+  }
+
+  // Called when coming back to this screen
+  @override
+  void didPopNext() {
+    _resumeScanning();
+  }
+
+  void _resumeScanning() async {
+    setState(() {
+      _scannedValue = null;
+    });
+
+    try {
+      await _controller?.startImageStream(_processCameraImage);
+    } catch (e) {
+      debugPrint("Error restarting image stream: $e");
+    }
   }
 
   Future<void> _initializeCamera() async {
@@ -121,6 +159,20 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
             setState(() {
               _scannedValue = barcode.rawValue;
             });
+            final product = await fetchProductByBarcode(_scannedValue!);
+
+            if (product != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddIngredientsView(
+                    initialName: product['title'],
+                    imageUrl: product['image'],
+                  ),
+                ),
+              );
+            }
+
             await _controller?.stopImageStream();
             break;
           }
@@ -129,8 +181,6 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
 
       if (_scannedValue == null) {
         debugPrint("No barcode has been scanned yet.");
-      } else {
-        debugPrint("Scanned Value: $_scannedValue");
       }
 
       await Future.delayed(const Duration(milliseconds: 300));
@@ -143,12 +193,27 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
 
 
 
-  @override
-  void dispose() {
-    _controller?.dispose();
-    _barcodeScanner.close();
-    super.dispose();
+  Future<Map<String, String>?> fetchProductByBarcode(String barcode) async {
+    final apiKey = dotenv.env['BARCODE_LOOKUP_API_KEY'];
+    final url = Uri.parse('https://api.barcodelookup.com/v3/products?barcode=$barcode&key=$apiKey');
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      if (jsonData['products'] != null && jsonData['products'].isNotEmpty) {
+        final product = jsonData['products'][0];
+        return {
+          'title': product['title'] ?? '',
+          'image': (product['images'] as List).isNotEmpty ? product['images'][0] : '',
+        };
+      }
+    } else {
+      print('Failed to fetch product: ${response.statusCode}');
+    }
+    return null;
   }
+
 
   @override
   Widget build(BuildContext context) {
