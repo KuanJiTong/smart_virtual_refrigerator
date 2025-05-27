@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import '../viewmodels/add_ingredients_viewmodel.dart';
 
 class AddIngredientsView extends StatefulWidget {
   final String? initialName;
@@ -54,6 +57,7 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    FocusScope.of(context).unfocus(); // <--- Add this line
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate,
@@ -68,10 +72,11 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     String quantityUnit = unitMapping[selectedCategory] ?? 'Unit';
-
+    final ingredientVM = Provider.of<IngredientViewModel>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text("Add Ingredient"),
@@ -189,9 +194,27 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
 
             /// Add Button
             ElevatedButton(
-              onPressed: () {
-                // Save to fridge action
+              onPressed: () async {
+                ingredientVM.updateName(nameController.text);
+                ingredientVM.updateCategory(selectedCategory);
+                ingredientVM.updateQuantity(quantityController.text);
+                ingredientVM.toggleExpiry(hasExpiry);
+                if (hasExpiry) {
+                  ingredientVM.updateExpirationDate(selectedDate);
+                }
+                ingredientVM.setImage(widget.imageUrl ?? '');
+
+                await ingredientVM.addIngredientToFirebase();
+
+                // Optional: show success message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Ingredient added to fridge')),
+                );
+
+                // Optionally navigate back
+                Navigator.pop(context);
               },
+
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.yellow[700],
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
