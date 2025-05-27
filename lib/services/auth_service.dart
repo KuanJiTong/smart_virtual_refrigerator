@@ -35,6 +35,7 @@ class AuthService {
   }
 
   signInWithGoogle() async {
+
     final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
 
     if(gUser == null) return;
@@ -56,5 +57,9 @@ class AuthService {
   Future<void> signOut() async {
     await GoogleSignIn().signOut();
     await _firebaseAuth.signOut();
+  }
+
+  String? get userId {
+    return _firebaseAuth.currentUser?.uid;
   }
 }
