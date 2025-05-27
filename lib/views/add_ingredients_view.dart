@@ -3,6 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../viewmodels/add_ingredients_viewmodel.dart';
+import 'add_ingredients_barcode_view.dart';
+import 'fridge_page.dart';
+import 'home_page.dart';
 
 class AddIngredientsView extends StatefulWidget {
   final String? initialName;
@@ -20,7 +23,7 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
   final TextEditingController dateController = TextEditingController();
 
   bool hasExpiry = true;
-  DateTime selectedDate = DateTime(2025, 4, 17);
+  DateTime selectedDate = DateTime.now().add(Duration(days: 7));
 
   final List<String> categories = [
     'Bread',
@@ -82,7 +85,8 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
         title: Text("Add Ingredient"),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AddIngredientsBarcodeView()))
+
         ),
         elevation: 0,
       ),
@@ -212,7 +216,8 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
                 );
 
                 // Optionally navigate back
-                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const HomePage(initialIndex: 2)));
+
               },
 
               style: ElevatedButton.styleFrom(

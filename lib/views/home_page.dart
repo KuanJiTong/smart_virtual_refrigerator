@@ -5,7 +5,9 @@ import '../views/login_view.dart';
 import 'fridge_page.dart'; // Make sure this path is correct
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final int initialIndex;
+
+  const HomePage({super.key, this.initialIndex = 0});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -26,6 +28,12 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
   }
 
   @override
