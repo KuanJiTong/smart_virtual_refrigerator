@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/fridge_viewmodel.dart';
+import 'add_ingredients_barcode_view.dart';
 import 'leftovers_page.dart';
 
 class FridgePage extends StatelessWidget {
@@ -193,9 +194,11 @@ class FridgeViewBody extends StatelessWidget {
                             leading: const Icon(Icons.qr_code_scanner),
                             title: const Text('Scan Barcode'),
                             onTap: () {
-                              Navigator.pop(context);
-                              // Add your navigation or logic here
-                              print('Scan Barcode tapped');
+                              Navigator.pop(context); // Close the drawer or current modal if needed
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => AddIngredientsBarcodeView()),
+                              );
                             },
                           ),
                         ],

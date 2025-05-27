@@ -10,6 +10,7 @@ import 'dart:convert';
 
 import '../main.dart';
 import 'add_ingredients_view.dart';
+import 'home_page.dart';
 
 class AddIngredientsBarcodeView extends StatefulWidget {
   @override
@@ -162,7 +163,9 @@ class _AddIngredientsBarcodeViewState extends State<AddIngredientsBarcodeView> w
             final product = await fetchProductByBarcode(_scannedValue!);
 
             if (product != null) {
-              Navigator.push(
+              await _controller?.stopImageStream();
+
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => AddIngredientsView(
@@ -171,16 +174,20 @@ class _AddIngredientsBarcodeViewState extends State<AddIngredientsBarcodeView> w
                   ),
                 ),
               );
+
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Invalid barcode UPC code'),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+              _scannedValue = null;
             }
 
-            await _controller?.stopImageStream();
             break;
           }
         }
-      }
-
-      if (_scannedValue == null) {
-        debugPrint("No barcode has been scanned yet.");
       }
 
       await Future.delayed(const Duration(milliseconds: 300));
@@ -220,7 +227,7 @@ class _AddIngredientsBarcodeViewState extends State<AddIngredientsBarcodeView> w
     return Scaffold(
       body: Stack(
         children: [
-          _isInitialized && _controller != null
+          _controller != null && _controller!.value.isInitialized && !_controller!.value.isTakingPicture
               ? SizedBox.expand(child: CameraPreview(_controller!))
               : const Center(child: CircularProgressIndicator()),
 
@@ -239,7 +246,7 @@ class _AddIngredientsBarcodeViewState extends State<AddIngredientsBarcodeView> w
                   ),
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back, color: Colors.black),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePage(initialIndex: 2))),
                   ),
                 ),
               ),
