@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../viewmodels/fridge_viewmodel.dart';
 import 'add_ingredients_barcode_view.dart';
 import 'leftovers_page.dart';
+import '../services/auth_service.dart';
 
 class FridgePage extends StatelessWidget {
   const FridgePage({super.key});
@@ -11,7 +12,33 @@ class FridgePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => FridgeViewModel(),
-      child: const FridgeViewBody(),
+      child: Consumer<FridgeViewModel>(
+        builder: (context, vm, _) {
+          final userId = AuthService().userId;
+          if (userId != null && vm.allIngredients.isEmpty && !vm.isLoading) {
+            vm.loadIngredients(userId);
+          }
+
+          if (vm.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (vm.allIngredients.isEmpty) {
+            return const Center(child: Text('No ingredients found'));
+          }
+
+          return ListView.builder(
+            itemCount: vm.allIngredients.length,
+            itemBuilder: (context, index) {
+              final item = vm.allIngredients[index];
+              return ListTile(
+                title: Text(item['name']),
+                subtitle: Text('Quantity: ${item['quantity']}'),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

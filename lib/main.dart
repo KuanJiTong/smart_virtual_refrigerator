@@ -108,15 +108,11 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
         debugShowCheckedModeBanner: false,
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        home: _isLoggedIn ? const HomePage() : const LoginView(),
-=======
-        home: HomePage(), 
->>>>>>> Stashed changes
-=======
-        home: HomePage(), 
->>>>>>> Stashed changes
+
+        home: const FridgePage(),
+
+
+
       ),
     );
   }
