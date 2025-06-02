@@ -19,24 +19,7 @@ class FridgePage extends StatelessWidget {
             vm.loadIngredients();
           }
 
-          if (vm.isLoading) { 
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (vm.allIngredients.isEmpty) {
-            return const Center(child: Text('No ingredients found'));
-          }
-
-          return ListView.builder(
-            itemCount: vm.allIngredients.length,
-            itemBuilder: (context, index) {
-              final item = vm.allIngredients[index];
-              return ListTile(
-                title: Text(item['name']),
-                subtitle: Text('Quantity: ${item['quantity']}'),
-              );
-            },
-          );
+          return const FridgeViewBody();
         },
       ),
     );
@@ -50,6 +33,19 @@ class FridgeViewBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = Provider.of<FridgeViewModel>(context);
 
+    final categories = [
+                      'All',
+                      'Vegetable',
+                      'Fruit',
+                      'Meat',
+                      'Dairy',
+                      'Beverage',
+                      'Spice',
+                      'Grain',
+                      'Condiment',
+                      'Bread'
+                    ];
+                    
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -154,10 +150,12 @@ class FridgeViewBody extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
+                    
                     // Category Filter Chips
                     Wrap(
                       spacing: 8,
-                      children: ['All', 'Vegetables', 'Fruit', 'Meat'].map((category) {
+                      runSpacing: 8,
+                      children: categories.map((category) {
                         return ChoiceChip(
                           label: Text(category),
                           selected: vm.selectedCategory == category,
@@ -309,8 +307,8 @@ class FridgeViewBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
-            child: Image.asset(
-              imagePath, 
+            child: Image.network(
+              'https://picsum.photos/seed/${name.hashCode}/100/100', 
               height: 35,
               width: 35,  
               fit: BoxFit.contain,
