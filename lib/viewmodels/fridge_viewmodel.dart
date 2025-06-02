@@ -8,8 +8,8 @@ enum SortOrder { nameAZ, expirySoonest, quantityHighToLow }
 
 class FridgeViewModel extends ChangeNotifier {
   final FirestoreService _firestoreService = FirestoreService();
-  final AuthService authService = AuthService();
-  
+  final AuthService _authService = AuthService();
+
   String selectedCategory = 'All';
   String searchKeyword = '';
   ExpiryFilter expiryFilter = ExpiryFilter.all;
@@ -17,17 +17,22 @@ class FridgeViewModel extends ChangeNotifier {
   SortOrder sortOrder = SortOrder.nameAZ;
 
   List<Map<String, dynamic>> allIngredients = [];
-  List<Map<String, dynamic>> allLeftovers = []; // This can later be fetched too
+  List<Map<String, dynamic>> allLeftovers = [];
   bool isLoading = false;
 
-   Future<void> loadIngredients(String userId) async {
+  Future<void> loadIngredients() async {
+    final userId = _authService.userId;
+    if (userId == null) {
+      print('No userId found');
+      return;
+    }
 
     isLoading = true;
     notifyListeners();
 
     try {
       allIngredients = await _firestoreService.fetchIngredients(userId);
-        print('Fetched ingredients: $allIngredients');
+      print('Fetched ingredients: $allIngredients');
     } catch (e) {
       print('Error loading ingredients: $e');
       allIngredients = [];
@@ -36,8 +41,6 @@ class FridgeViewModel extends ChangeNotifier {
     isLoading = false;
     notifyListeners();
   }
-
-  
 
   List<Map<String, dynamic>> get filteredIngredients {
     List<Map<String, dynamic>> filtered = allIngredients.where((item) {
@@ -51,7 +54,6 @@ class FridgeViewModel extends ChangeNotifier {
       return matchesCategory && matchesSearch && matchesExpiry && matchesQuantity;
     }).toList();
 
-    // Sort
     switch (sortOrder) {
       case SortOrder.nameAZ:
         filtered.sort((a, b) => a['name'].compareTo(b['name']));

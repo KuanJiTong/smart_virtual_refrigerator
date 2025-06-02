@@ -16,10 +16,10 @@ class FridgePage extends StatelessWidget {
         builder: (context, vm, _) {
           final userId = AuthService().userId;
           if (userId != null && vm.allIngredients.isEmpty && !vm.isLoading) {
-            vm.loadIngredients(userId);
+            vm.loadIngredients();
           }
 
-          if (vm.isLoading) {
+          if (vm.isLoading) { 
             return const Center(child: CircularProgressIndicator());
           }
 

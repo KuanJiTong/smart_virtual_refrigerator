@@ -109,8 +109,7 @@ class _MyAppState extends State<MyApp> {
         ),
         debugShowCheckedModeBanner: false,
 
-        home: const FridgePage(),
-
+        home: _isLoggedIn ? const HomePage() : const LoginView(),
 
 
       ),
