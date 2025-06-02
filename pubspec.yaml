@@ -31,6 +31,11 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.0.5
+  camera: ^0.11.1
+  google_mlkit_barcode_scanning: ^0.14.1
+  google_mlkit_commons: ^0.11.0
+  image_picker: ^1.0.5
+  firebase_storage: ^12.4.6
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -40,6 +45,10 @@ dependencies:
   firebase_ui_auth: ^1.16.1
   google_sign_in: ^6.3.0
   firebase_ui_oauth_google: ^1.4.1
+  cloud_firestore: ^5.6.8
+
+  flutter_dotenv: ^5.1.0
+  http: ^1.4.0
   cloud_firestore: ^5.6.8
 
 dev_dependencies:
@@ -67,6 +76,12 @@ flutter:
   assets:
     - assets/logo.png
     - assets/google_logo.png
+    - assets/chicken_rice.jpg
+    - assets/sushi.jpg
+    - assets/potatoes.jpg
+    - assets/massimo.jpg
+    - assets/bananas.jpg
+    - .env
 
   fonts:
     - family: Poppins

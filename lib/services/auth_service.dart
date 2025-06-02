@@ -58,4 +58,8 @@ class AuthService {
     await GoogleSignIn().signOut();
     await _firebaseAuth.signOut();
   }
+
+  String? get userId {
+    return _firebaseAuth.currentUser?.uid;
+  }
 }
