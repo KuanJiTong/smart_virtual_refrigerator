@@ -4,6 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
 
 class LoginViewModel extends ChangeNotifier {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  User? get user => _auth.currentUser;
+
   String email = '';
   String password = '';
   bool isLoading = false;

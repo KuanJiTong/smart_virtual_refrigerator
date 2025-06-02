@@ -1,11 +1,15 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/forgot_password_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/views/home_page.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
 import '../viewmodels/signup_viewmodel.dart';
 import '../viewmodels/login_viewmodel.dart';
+import '../viewmodels/recipe_viewmodel.dart';
+import '../viewmodels/ingredient_viewmodel.dart';
+
 import '../views/login_view.dart'; 
 
 void main() async {
@@ -24,6 +28,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SignupViewModel()),
         ChangeNotifierProvider(create: (_) => LoginViewModel()), 
         ChangeNotifierProvider(create: (_) => ForgotPasswordViewModel()), 
+        ChangeNotifierProvider(create: (_) => RecipeViewModel()),
+        ChangeNotifierProvider(create: (_) => IngredientViewModel(),child: HomePage(),
+)
       ],
       child: MaterialApp(
         title: 'Smart Virtual Refrigerator',
