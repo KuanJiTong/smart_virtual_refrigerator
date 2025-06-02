@@ -3,14 +3,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/add_ingredients_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/forgot_password_viewmodel.dart';
-
 import 'package:smart_virtual_refrigerator/viewmodels/fridge_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/views/add_ingredients_barcode_view.dart';
 import 'package:smart_virtual_refrigerator/views/add_ingredients_view.dart';
 import 'package:smart_virtual_refrigerator/views/signup_view.dart';
 
 import 'package:smart_virtual_refrigerator/views/home_page.dart';
-
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 

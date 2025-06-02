@@ -141,7 +141,37 @@ class _HomeBody extends StatelessWidget {
                   );
                 },
               ),
+              onChanged: (value) {
+                Provider.of<RecipeViewModel>(context, listen: false).updateSearch(value);
+              },
+            ),
               const SizedBox(height: 16),
+              Consumer<RecipeViewModel>(
+              builder: (context, recipeVM, child) {
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: recipeVM.categories.map((category) {
+                      final isSelected = recipeVM.selectedCategory == category;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: ChoiceChip(
+                          label: Text(category),
+                          selected: isSelected,
+                          onSelected: (_) => recipeVM.updateCategory(category),
+                          selectedColor: Colors.black,
+                          backgroundColor: Colors.grey[300],
+                          labelStyle: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
