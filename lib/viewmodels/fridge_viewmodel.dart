@@ -18,6 +18,7 @@ class FridgeViewModel extends ChangeNotifier {
 
   List<Map<String, dynamic>> allIngredients = [];
   List<Map<String, dynamic>> allLeftovers = [];
+  
   bool isLoading = false;
 
   Future<void> loadIngredients() async {

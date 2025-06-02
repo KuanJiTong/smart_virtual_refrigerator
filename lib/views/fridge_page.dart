@@ -396,16 +396,39 @@ class FridgeViewBody extends StatelessWidget {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    elevation: 4,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                   child: const Text('Apply Filters'),
                 ),
               ),
+
               const SizedBox(width: 12),
+
+              // Clear Filters Button – styled identically
               Expanded(
-                child: OutlinedButton(
+                child: ElevatedButton(
                   onPressed: () {
                     vm.clearFilters();
                     Navigator.pop(context);
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    elevation: 4,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide.none, // Remove any border
+                    ),
+                    shadowColor: Colors.black26,
+                  ),
                   child: const Text('Clear Filters'),
                 ),
               ),
