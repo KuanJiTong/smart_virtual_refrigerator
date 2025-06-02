@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import '../services/firestore_service.dart'; // adjust the path as necessary
+import '../services/firestore_service.dart';
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+
+import '../services/storage_service.dart';
 
 class IngredientViewModel extends ChangeNotifier {
   String name = '';
@@ -11,6 +15,16 @@ class IngredientViewModel extends ChangeNotifier {
   String imageUrl = '';
 
   final FirestoreService _firestoreService = FirestoreService();
+  final StorageService _storageService = StorageService();
+
+  Future<String> uploadPickedImageToFirebase(File pickedImageFile) async {
+    if (pickedImageFile == null) return '';
+
+    imageUrl = await _storageService.uploadIngredientImage(pickedImageFile!);
+    notifyListeners();
+    return imageUrl;
+
+  }
 
   void updateName(String value) {
     name = value;
