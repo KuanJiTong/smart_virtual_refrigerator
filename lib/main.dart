@@ -84,11 +84,9 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => ForgotPasswordViewModel()),
         ChangeNotifierProvider(create: (_) => FridgeViewModel()),
+        ChangeNotifierProvider(create: (_) => AddIngredientViewModel()),
         ChangeNotifierProvider(create: (_) => IngredientViewModel()),
         ChangeNotifierProvider(create: (_) => RecipeViewModel()),
-        ChangeNotifierProvider(create: (_) => IngredientViewModel(),child: HomePage(),
-)
-
       ],
       child: MaterialApp(
         title: 'Smart Virtual Refrigerator',

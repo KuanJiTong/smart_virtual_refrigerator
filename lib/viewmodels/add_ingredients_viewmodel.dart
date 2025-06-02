@@ -6,7 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 import '../services/storage_service.dart';
 
-class IngredientViewModel extends ChangeNotifier {
+class AddIngredientViewModel extends ChangeNotifier {
   String name = '';
   String category = 'Bread';
   String quantity = '';

@@ -77,7 +77,7 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
   @override
   Widget build(BuildContext context) {
     String quantityUnit = unitMapping[selectedCategory] ?? 'Unit';
-    final ingredientVM = Provider.of<IngredientViewModel>(context);
+    final ingredientVM = Provider.of<AddIngredientViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(

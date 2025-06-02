@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_virtual_refrigerator/models/ingredient.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/ingredient_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/login_viewmodel.dart';
 import '../views/login_view.dart';
 import 'fridge_page.dart'; // Make sure this path is correct
 import 'package:smart_virtual_refrigerator/viewmodels/recipe_viewmodel.dart';
-import '../views/login_view.dart'; 
+import '../views/login_view.dart';
 
 class HomePage extends StatefulWidget {
   final int initialIndex;
@@ -42,10 +43,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final signout = Provider.of<LoginViewModel>(context, listen: false);
-    final recipeVM = Provider.of<RecipeViewModel>(context);
-    final ingredientVM = Provider.of<IngredientViewModel>(context);
-    ingredientVM.fetchIngredients(signout.user?.uid ?? "");
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -90,115 +87,132 @@ class _HomeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: ListView(
-        children: [
-          Row(
+    final signout = Provider.of<LoginViewModel>(context, listen: false);
+    final recipeVM = Provider.of<RecipeViewModel>(context);
+    final ingredientVM = Provider.of<IngredientViewModel>(context);
+    ingredientVM.fetchIngredients(signout.user?.uid ?? "");
+
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: ListView(
             children: [
-                  _buildHeader(),
+              _buildHeader(),
               const SizedBox(height: 20),
               TextField(
-              decoration: InputDecoration(
-                hintText: 'Search recipe',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
+                decoration: InputDecoration(
+                  hintText: 'Search recipe',
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
+                onChanged: (value) {
+                  Provider.of<RecipeViewModel>(context, listen: false)
+                      .updateSearch(value);
+                },
               ),
-              onChanged: (value) {
-                Provider.of<RecipeViewModel>(context, listen: false).updateSearch(value);
-              },
-            ),
               const SizedBox(height: 16),
               Consumer<RecipeViewModel>(
-              builder: (context, recipeVM, child) {
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: recipeVM.categories.map((category) {
-                      final isSelected = recipeVM.selectedCategory == category;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: ChoiceChip(
-                          label: Text(category),
-                          selected: isSelected,
-                          onSelected: (_) => recipeVM.updateCategory(category),
-                          selectedColor: Colors.black,
-                          backgroundColor: Colors.grey[300],
-                          labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black,
+                builder: (context, recipeVM, child) {
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: recipeVM.categories.map((category) {
+                        final isSelected = recipeVM.selectedCategory ==
+                            category;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: ChoiceChip(
+                            label: Text(category),
+                            selected: isSelected,
+                            onSelected: (_) =>
+                                recipeVM.updateCategory(category),
+                            selectedColor: Colors.black,
+                            backgroundColor: Colors.grey[300],
+                            labelStyle: TextStyle(
+                              color: isSelected ? Colors.white : Colors.black,
+                            ),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
+                        );
+                      }).toList(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
                   Text('Recipes you can make',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 18)),
                   Icon(Icons.tune),
                 ],
               ),
               const SizedBox(height: 24),
-               Column(
-               children: recipeVM.filteredRecipes.map((recipe) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(8),
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        recipe.imageUrl,
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
-                      ),
+              Column(
+                children: recipeVM.filteredRecipes.map((recipe) {
+                  return Container(
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 6, horizontal: 8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    title: Text(recipe.title),
-                    subtitle: Text(recipe.category),
-                  ),
-                );
-              }).toList(),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(8),
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          recipe.imageUrl,
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error,
+                              stackTrace) => const Icon(Icons.broken_image),
+                        ),
+                      ),
+                      title: Text(recipe.title),
+                      subtitle: Text(recipe.category),
+                    ),
+                  );
+                }).toList(),
 
               ),
               const SizedBox(height: 24),
               Row(
                 children: [
                   const Text('Expiring soon',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 18)),
                   const Spacer(),
                 ],
               ),
               const SizedBox(height: 12),
               Column(
-              children: ingredientVM.expiringSoonIngredients.map((ingredient) {
-                return ListTile(
-                  leading: Image.network(ingredient.image, width: 50, height: 50, errorBuilder: (context, error, stackTrace) => Icon(Icons.image)),
-                  title: Text(ingredient.name),
-                  subtitle: Text('${ingredient.daysLeftToExpire} day(s) left'),
-                  trailing: Text(ingredient.quantity),
-                );
-              }).toList(),
-            ),
+                children: ingredientVM.expiringSoonIngredients.map((
+                    ingredient) {
+                  return ListTile(
+                    leading: Image.network(ingredient.image, width: 50,
+                        height: 50,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Icon(Icons.image)),
+                    title: Text(ingredient.name),
+                    subtitle: Text(
+                        '${ingredient.daysLeftToExpire} day(s) left'),
+                    trailing: Text(ingredient.quantity),
+                  );
+                }).toList(),
+              ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
-}
+
   Widget _buildHeader() {
     return Row(
       children: [
