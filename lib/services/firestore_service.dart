@@ -52,6 +52,45 @@ class FirestoreService {
     await _firestore.collection('ingredients').add(ingredientData);
   }
 
+  Future<void> deleteIngredient(String docId) async {
+    try {
+      await _firestore.collection('ingredients').doc(docId).delete();
+    } catch (e) {
+      print('Error deleting ingredient: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updateIngredient({
+    required String docId,
+    required String name,
+    required String category,
+    required String quantity,
+    required bool hasExpiry,
+    DateTime? expirationDate,
+    required String imageUrl,
+  }) async {
+    final String quantityWithUnit = _formatQuantity(quantity, _getUnit(category));
+    final String formattedDate = hasExpiry && expirationDate != null
+        ? DateFormat('yyyy-MM-dd').format(expirationDate)
+        : '';
+    final int daysLeft = hasExpiry && expirationDate != null
+        ? expirationDate.difference(DateTime.now()).inDays
+        : 0;
+
+    final docRef = FirebaseFirestore.instance.collection('ingredients').doc(docId);
+
+    final Map<String, dynamic> updatedData = {
+      'category': category,
+      'image': imageUrl,
+      'quantity': quantityWithUnit,
+      'name': name,
+      'expiredDate': formattedDate,
+      'daysLeftToExpire': daysLeft,
+    };
+    await docRef.update(updatedData);
+  }
+
   String _getUnit(String category) {
     final Map<String, String> unitMapping = {
       'Bread': 'Slice',

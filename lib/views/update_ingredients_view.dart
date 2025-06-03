@@ -5,35 +5,34 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../viewmodels/add_ingredients_viewmodel.dart';
-import 'add_ingredients_barcode_view.dart';
+import '../viewmodels/update_ingredients_viewmodel.dart';
 import 'fridge_page.dart';
 import 'home_page.dart';
 
-class AddIngredientsView extends StatefulWidget {
-  final String? initialName;
-  final String? imageUrl;
+class UpdateIngredientsView extends StatefulWidget {
+  final Map<String, dynamic> ingredient;
 
-  const AddIngredientsView({this.initialName, this.imageUrl, super.key});
+  const UpdateIngredientsView({super.key, required this.ingredient});
 
   @override
-  _AddIngredientsViewState createState() => _AddIngredientsViewState();
+  _UpdateIngredientsViewState createState() => _UpdateIngredientsViewState();
 }
 
-class _AddIngredientsViewState extends State<AddIngredientsView> {
+class _UpdateIngredientsViewState extends State<UpdateIngredientsView> {
   bool _isLoading = false;
-  final TextEditingController nameController = TextEditingController(text: 'Ingredient Name');
-  final TextEditingController quantityController = TextEditingController(text: '10');
-  final TextEditingController dateController = TextEditingController();
+  late TextEditingController nameController;
+  late TextEditingController quantityController;
+  late TextEditingController dateController;
 
-  bool hasExpiry = true;
-  DateTime selectedDate = DateTime.now().add(Duration(days: 7));
+  bool hasExpiry = false;
+  DateTime selectedDate = DateTime.now();
   File? _pickedImage;
 
   final List<String> categories = [
     'Bread', 'Meat', 'Vegetable', 'Fruit', 'Dairy', 'Beverage', 'Spice', 'Grain', 'Condiment',
   ];
 
-  String selectedCategory = 'Bread';
+  late String selectedCategory;
 
   final Map<String, String> unitMapping = {
     'Bread': 'Slice', 'Meat': 'Gram', 'Vegetable': 'Gram', 'Fruit': 'Piece',
@@ -44,9 +43,20 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
   @override
   void initState() {
     super.initState();
-    nameController.text = widget.initialName ?? 'Massimo Sandwich Loaf';
-    dateController.text = DateFormat('dd MMM yyyy').format(selectedDate);
-    selectedCategory = categories.contains('Bread') ? 'Bread' : categories.first;
+    nameController = TextEditingController(text: widget.ingredient['name'] ?? '');
+    quantityController = TextEditingController(
+      text: RegExp(r'\d+').stringMatch(widget.ingredient['quantity']) ?? '',
+    );
+
+    selectedCategory = widget.ingredient['category'] ?? categories.first;
+
+    if (widget.ingredient['expiredDate'] != '') {
+      hasExpiry = true;
+      selectedDate = DateTime.parse(widget.ingredient['expiredDate']);
+    }
+    dateController = TextEditingController(
+      text: hasExpiry ? DateFormat('dd MMM yyyy').format(selectedDate) : DateFormat('dd MMM yyyy').format(DateTime.now()),
+    );
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -78,14 +88,14 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
   @override
   Widget build(BuildContext context) {
     String quantityUnit = unitMapping[selectedCategory] ?? 'Unit';
-    final ingredientVM = Provider.of<AddIngredientViewModel>(context);
+    final ingredientVM = Provider.of<UpdateIngredientsViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add Ingredient"),
+        title: const Text("Update Ingredient"),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AddIngredientsBarcodeView())),
+          onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePage(initialIndex: 2))),
         ),
         elevation: 0,
       ),
@@ -97,8 +107,8 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
               Center(
                 child: _pickedImage != null
                     ? Image.file(_pickedImage!, height: 180)
-                    : widget.imageUrl != null
-                    ? Image.network(widget.imageUrl!, height: 180)
+                    : widget.ingredient['image'] != null
+                    ? Image.network(widget.ingredient['image'], height: 180)
                     : Image.network('https://imageplaceholder.net/150x150', height: 180),
               ),
               Center(
@@ -112,7 +122,8 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
                   ],
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
+        
               // Name
               TextFormField(
                 controller: nameController,
@@ -121,13 +132,13 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
-              SizedBox(height: 16),
-
-              // Expire Switch
+              const SizedBox(height: 16),
+        
+              // Expiry Switch
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Expire", style: TextStyle(fontSize: 16)),
+                  const Text("Has Expiry", style: TextStyle(fontSize: 16)),
                   Switch(
                     value: hasExpiry,
                     onChanged: (val) {
@@ -136,9 +147,9 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
                   )
                 ],
               ),
-              SizedBox(height: 8),
-
-              // Expiration Date
+              const SizedBox(height: 8),
+        
+              // Expiry Date
               if (hasExpiry)
                 TextFormField(
                   controller: dateController,
@@ -149,8 +160,8 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
-              SizedBox(height: 16),
-
+              const SizedBox(height: 16),
+        
               // Quantity
               Row(
                 children: [
@@ -164,18 +175,18 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Column(
                     children: [
                       IconButton(
-                        icon: Icon(Icons.add),
+                        icon: const Icon(Icons.add),
                         onPressed: () {
                           int current = int.tryParse(quantityController.text) ?? 0;
                           quantityController.text = (current + 1).toString();
                         },
                       ),
                       IconButton(
-                        icon: Icon(Icons.remove),
+                        icon: const Icon(Icons.remove),
                         onPressed: () {
                           int current = int.tryParse(quantityController.text) ?? 0;
                           if (current > 0) quantityController.text = (current - 1).toString();
@@ -185,8 +196,8 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
                   ),
                 ],
               ),
-              SizedBox(height: 16),
-
+              const SizedBox(height: 16),
+        
               // Category
               DropdownButtonFormField<String>(
                 value: selectedCategory,
@@ -206,9 +217,9 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
                   });
                 },
               ),
-              SizedBox(height: 32),
-
-              // Add Button
+              const SizedBox(height: 32),
+        
+              // Update Button
               ElevatedButton(
                 onPressed: () async {
                   setState(() => _isLoading = true);
@@ -218,29 +229,28 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
                     ingredientVM.updateCategory(selectedCategory);
                     ingredientVM.updateQuantity(quantityController.text);
                     ingredientVM.toggleExpiry(hasExpiry);
+
                     if (hasExpiry) {
                       ingredientVM.updateExpirationDate(selectedDate);
                     }
 
-                    // If image is picked locally, you'd want to upload it first and get the URL
                     if (_pickedImage != null) {
-                      // You need to implement your own image upload logic and get the imageUrl
-                      String uploadedImageUrl = await ingredientVM.uploadPickedImageToFirebase(_pickedImage!);
-                      ingredientVM.setImage(uploadedImageUrl);
+                      String uploadedUrl = await ingredientVM.uploadPickedImageToFirebase(_pickedImage!);
+                      ingredientVM.setImage(uploadedUrl);
                     } else {
-                      ingredientVM.setImage(widget.imageUrl ?? 'https://imageplaceholder.net/150x150');
+                      ingredientVM.setImage(widget.ingredient['image'] ?? 'https://imageplaceholder.net/150x150');
                     }
 
-                    await ingredientVM.addIngredientToFirebase();
+                    await ingredientVM.updateIngredientInFirebase(widget.ingredient['id']);
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Ingredient added to fridge')),
+                      const SnackBar(content: Text('Ingredient updated successfully')),
                     );
 
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const HomePage(initialIndex: 2)));
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePage(initialIndex: 2)));
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to add ingredient: $e')),
+                      SnackBar(content: Text('Failed to update ingredient: $e')),
                     );
                   } finally {
                     setState(() => _isLoading = false);
@@ -249,10 +259,62 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.yellow[700],
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                 ),
-                child: Text("Add to Fridge", style: TextStyle(fontSize: 16, color: Colors.black)),
+                child: const Text("Update Ingredient", style: TextStyle(fontSize: 16, color: Colors.black)),
               ),
+              SizedBox(height: 5),
+              ElevatedButton(
+                onPressed: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Confirm Deletion'),
+                      content: const Text('Are you sure you want to delete this ingredient? This action cannot be undone.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirm == true) {
+                    setState(() => _isLoading = true);
+                    try {
+                      await ingredientVM.deleteIngredientFromFirebase(widget.ingredient['id']);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Ingredient deleted successfully')),
+                      );
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const HomePage(initialIndex: 2)),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to delete ingredient: $e')),
+                      );
+                    } finally {
+                      setState(() => _isLoading = false);
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                ),
+                child: const Text(
+                  "Delete Ingredient",
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ),
+
             ],
           ),
         ),
