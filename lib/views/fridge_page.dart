@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../viewmodels/fridge_viewmodel.dart';
 import 'add_ingredients_barcode_view.dart';
 import 'leftovers_page.dart';
+import '../services/auth_service.dart';
 
 class FridgePage extends StatelessWidget {
   const FridgePage({super.key});
@@ -11,7 +12,16 @@ class FridgePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => FridgeViewModel(),
-      child: const FridgeViewBody(),
+      child: Consumer<FridgeViewModel>(
+        builder: (context, vm, _) {
+          final userId = AuthService().userId;
+          if (userId != null && vm.allIngredients.isEmpty && !vm.isLoading) {
+            vm.loadIngredients();
+          }
+
+          return const FridgeViewBody();
+        },
+      ),
     );
   }
 }
@@ -23,6 +33,19 @@ class FridgeViewBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = Provider.of<FridgeViewModel>(context);
 
+    final categories = [
+                      'All',
+                      'Vegetable',
+                      'Fruit',
+                      'Meat',
+                      'Dairy',
+                      'Beverage',
+                      'Spice',
+                      'Grain',
+                      'Condiment',
+                      'Bread'
+                    ];
+                    
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -127,10 +150,12 @@ class FridgeViewBody extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
+                    
                     // Category Filter Chips
                     Wrap(
                       spacing: 8,
-                      children: ['All', 'Vegetables', 'Fruit', 'Meat'].map((category) {
+                      runSpacing: 8,
+                      children: categories.map((category) {
                         return ChoiceChip(
                           label: Text(category),
                           selected: vm.selectedCategory == category,
@@ -282,8 +307,8 @@ class FridgeViewBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
-            child: Image.asset(
-              imagePath, 
+            child: Image.network(
+              'https://picsum.photos/seed/${name.hashCode}/100/100', 
               height: 35,
               width: 35,  
               fit: BoxFit.contain,
@@ -371,16 +396,39 @@ class FridgeViewBody extends StatelessWidget {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    elevation: 4,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                   child: const Text('Apply Filters'),
                 ),
               ),
+
               const SizedBox(width: 12),
+
+              // Clear Filters Button – styled identically
               Expanded(
-                child: OutlinedButton(
+                child: ElevatedButton(
                   onPressed: () {
                     vm.clearFilters();
                     Navigator.pop(context);
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    elevation: 4,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide.none, // Remove any border
+                    ),
+                    shadowColor: Colors.black26,
+                  ),
                   child: const Text('Clear Filters'),
                 ),
               ),

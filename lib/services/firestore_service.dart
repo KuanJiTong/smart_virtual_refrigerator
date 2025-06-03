@@ -4,6 +4,24 @@ import 'package:intl/intl.dart';
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  Future<List<Map<String, dynamic>>> fetchIngredients(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('ingredients')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    } catch (e) {
+      print('Error fetching ingredients: $e');
+      return [];
+    }
+  }
+
   Future<void> addIngredient({
     required String userId,
     required String name,

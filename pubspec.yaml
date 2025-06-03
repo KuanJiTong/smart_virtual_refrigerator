@@ -34,6 +34,7 @@ dependencies:
   camera: ^0.11.1
   google_mlkit_barcode_scanning: ^0.14.1
   google_mlkit_commons: ^0.11.0
+  intl: ^0.19.0
   image_picker: ^1.0.5
   firebase_storage: ^12.4.6
 
@@ -49,6 +50,7 @@ dependencies:
   flutter_dotenv: ^5.1.0
   http: ^1.4.0
   cloud_firestore: ^5.6.8
+
 
 dev_dependencies:
   flutter_test:
@@ -73,13 +75,7 @@ flutter:
   uses-material-design: true
   
   assets:
-    - assets/logo.png
-    - assets/google_logo.png
-    - assets/chicken_rice.jpg
-    - assets/sushi.jpg
-    - assets/potatoes.jpg
-    - assets/massimo.jpg
-    - assets/bananas.jpg
+    - assets/
     - .env
 
   fonts:

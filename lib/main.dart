@@ -115,7 +115,10 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
         debugShowCheckedModeBanner: false,
+
         home: _isLoggedIn ? const HomePage() : const LoginView(),
+
+
       ),
     );
   }

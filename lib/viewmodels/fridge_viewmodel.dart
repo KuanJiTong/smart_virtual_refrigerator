@@ -1,79 +1,47 @@
 import 'package:flutter/material.dart';
+import '../services/firestore_service.dart';
+import '../services/auth_service.dart';
 
 enum ExpiryFilter { all, expiringSoon }
 enum QuantityFilter { all, lowStock }
 enum SortOrder { nameAZ, expirySoonest, quantityHighToLow }
 
-
 class FridgeViewModel extends ChangeNotifier {
+  final FirestoreService _firestoreService = FirestoreService();
+  final AuthService _authService = AuthService();
+
   String selectedCategory = 'All';
   String searchKeyword = '';
   ExpiryFilter expiryFilter = ExpiryFilter.all;
   QuantityFilter quantityFilter = QuantityFilter.all;
   SortOrder sortOrder = SortOrder.nameAZ;
 
-
-  final List<Map<String, dynamic>> allIngredients = [
-    {
-      'category': 'Vegetables',
-      'image': 'potatoes.jpg',
-      'quantity': '600g',
-      'name': 'Potatoes',
-      'expiredDate': '2025-05-25',
-      'daysLeftToExpire': 4,
-    },
-    {
-      'category': 'Meat',
-      'image': 'massimo.jpg',
-      'quantity': '12pcs',
-      'name': 'Chicken Breast',
-      'expiredDate': '2025-05-23',
-      'daysLeftToExpire': 2,
-    },
-    {
-      'category': 'Fruit',
-      'image': 'bananas.jpg',
-      'quantity': '6pcs',
-      'name': 'Banana',
-      'expiredDate': '2025-05-21',
-      'daysLeftToExpire': 0,
-    },
-  ];
-
-  final List<Map<String, dynamic>> allLeftovers = [
-    {
-      'image': 'chicken_rice.jpg',
-      'title': 'Chicken breast with rice',
-      'date': '17/04/25',
-      'quantity': 2
-    },
-    {
-      'image': 'sushi.jpg',
-      'title': 'Sushi rolls',
-      'date': '26/04/25',
-      'quantity': 3
-    },
-    {
-      'image': 'sushi.jpg',
-      'title': 'Sushi rolls',
-      'date': '26/04/25',
-      'quantity': 3
-    },
-    {
-      'image': 'sushi.jpg',
-      'title': 'Sushi rolls',
-      'date': '26/04/25',
-      'quantity': 3
-    },
-    {
-      'image': 'sushi.jpg',
-      'title': 'Sushi rolls',
-      'date': '26/04/25',
-      'quantity': 3
-    },
-  ];
-
+  List<Map<String, dynamic>> allIngredients = [];
+  List<Map<String, dynamic>> allLeftovers = [];
+  
   bool isLoading = false;
+
+  Future<void> loadIngredients() async {
+    final userId = _authService.userId;
+    if (userId == null) {
+      print('No userId found');
+      return;
+    }
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      allIngredients = await _firestoreService.fetchIngredients(userId);
+      print('Fetched ingredients: $allIngredients');
+    } catch (e) {
+      print('Error loading ingredients: $e');
+      allIngredients = [];
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
 
   List<Map<String, dynamic>> get filteredIngredients {
     List<Map<String, dynamic>> filtered = allIngredients.where((item) {
@@ -81,14 +49,12 @@ class FridgeViewModel extends ChangeNotifier {
       final matchesSearch = item['name'].toString().toLowerCase().contains(searchKeyword.toLowerCase());
       final matchesExpiry = expiryFilter == ExpiryFilter.all ||
           (expiryFilter == ExpiryFilter.expiringSoon && item['daysLeftToExpire'] <= 2);
-
       final matchesQuantity = quantityFilter == QuantityFilter.all ||
           (quantityFilter == QuantityFilter.lowStock && _isLowStock(item['quantity']));
 
       return matchesCategory && matchesSearch && matchesExpiry && matchesQuantity;
     }).toList();
 
-    // Sorting
     switch (sortOrder) {
       case SortOrder.nameAZ:
         filtered.sort((a, b) => a['name'].compareTo(b['name']));
@@ -147,7 +113,7 @@ class FridgeViewModel extends ChangeNotifier {
     searchKeyword = '';
     notifyListeners();
   }
-  
+
   void setLoading(bool loading) {
     isLoading = loading;
     notifyListeners();
