@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_virtual_refrigerator/views/update_ingredients_view.dart';
 import '../viewmodels/fridge_viewmodel.dart';
 import 'add_ingredients_barcode_view.dart';
 import 'leftovers_page.dart';
@@ -178,17 +179,27 @@ class FridgeViewBody extends StatelessWidget {
                             return SizedBox(
                               width: cardWidth,
                               child: _ingredientCard(
-                                imagePath: 'assets/${ingredient['image']}',
+                                id: ingredient['id'],
+                                image: '${ingredient['image']}',
                                 quantity: ingredient['quantity'],
                                 name: ingredient['name'],
                                 expiredDate: ingredient['expiredDate'],
                                 daysLeftToExpire: ingredient['daysLeftToExpire'],
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => UpdateIngredientsView(ingredient: ingredient),
+                                    ),
+                                  );
+                                },
                               ),
                             );
                           },
                         );
                       }).toList(),
                     ),
+
                   ],
                 ),
               ),
@@ -289,46 +300,49 @@ class FridgeViewBody extends StatelessWidget {
   }
 
   Widget _ingredientCard({
-    required String imagePath,
+    required String id,
+    required String image,
     required String quantity,
     required String name,
     required String expiredDate,
     required int daysLeftToExpire,
+    required VoidCallback onTap,
   }) {
-    return Container(
-      height: 150,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Image.network(
-              'https://picsum.photos/seed/${name.hashCode}/100/100', 
-              height: 35,
-              width: 35,  
-              fit: BoxFit.contain,
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        height: 150,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Image.network(
+                image,
+                height: 35,
+                width: 35,
+                fit: BoxFit.contain,
               ),
             ),
-          const SizedBox(height: 8),
-          Text(
-            name,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-            overflow: TextOverflow.ellipsis, // <-- Truncate with "..."
-            maxLines: 1, // <-- Ensure it doesn't exceed 1 line
-          ),
-          Text('Qty: $quantity'),
-          Text('Expires: $expiredDate'),
-          Text('Days left: $daysLeftToExpire',
-              style: TextStyle(color: daysLeftToExpire <= 1 ? Colors.red : Colors.black)),
-        ],
+            const SizedBox(height: 8),
+            Text(name, style: const TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1),
+            Text('Qty: $quantity'),
+            Text('Expires: $expiredDate'),
+            Text(
+              'Days left: $daysLeftToExpire',
+              style: TextStyle(color: daysLeftToExpire <= 1 ? Colors.red : Colors.black),
+            ),
+          ],
+        ),
       ),
     );
   }
+
 
   Widget _buildFilterSheet(BuildContext context, FridgeViewModel vm) {  
     return Padding(
