@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import '../viewmodels/fridge_viewmodel.dart';
 
 class LeftoversPage extends StatelessWidget {
-  const LeftoversPage({super.key});
+  final List<Map<String, dynamic>> leftovers;
+  const LeftoversPage({super.key, required this.leftovers});
 
   @override
   Widget build(BuildContext context) {
@@ -16,17 +17,17 @@ class LeftoversPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView.builder(
-          itemCount: vm.allLeftovers.length,
+          itemCount: leftovers.length,
           itemBuilder: (context, index) {
-            final leftover = vm.allLeftovers[index];
+            final leftover = leftovers[index];
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
               child: Row(
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      'assets/${leftover['image']}',
+                    child: Image.network(
+                      'https://picsum.photos/seed/${leftover['name'].hashCode}/80/80',
                       width: 80,
                       height: 80,
                       fit: BoxFit.cover,
@@ -38,13 +39,13 @@ class LeftoversPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          leftover['title'],
+                          leftover['name'],
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
-                        Text(leftover['date'], style: const TextStyle(color: Colors.grey)),
+                        Text(leftover['expiryDate'], style: const TextStyle(color: Colors.grey)),
                       ],
                     ),
                   ),

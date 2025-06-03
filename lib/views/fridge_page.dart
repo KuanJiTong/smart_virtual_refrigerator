@@ -114,7 +114,9 @@ class FridgeViewBody extends StatelessWidget {
                                 onPressed: () {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (_) => const LeftoversPage()),
+                                    MaterialPageRoute(
+                                      builder: (_) => LeftoversPage(leftovers: vm.allLeftovers),
+                                    ),
                                   );
                                 },
                                 child: const Text('View All'),
@@ -247,24 +249,14 @@ class FridgeViewBody extends StatelessWidget {
     required String expiryDate,
     required int quantity,
   }) {
-    final fallbackImage = 'https://picsum.photos/seed/${name.hashCode}/100/100';
 
     Widget imageWidget;
-    if (imageUrl != null && imageUrl.startsWith('assets/')) {
-      imageWidget = Image.asset(
-        imageUrl,
-        width: double.infinity,
-        height: 100,
-        fit: BoxFit.cover,
-      );
-    } else {
-      imageWidget = Image.network(
-        imageUrl?.isNotEmpty == true ? imageUrl! : fallbackImage,
-        width: double.infinity,
-        height: 100,
-        fit: BoxFit.cover,
-      );
-    }
+    imageWidget = Image.network(
+      'https://picsum.photos/seed/${name.hashCode}/100/100',
+      width: double.infinity,
+      height: 100,
+      fit: BoxFit.cover,
+    );
 
     return Container(
       width: 180,
