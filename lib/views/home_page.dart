@@ -141,10 +141,6 @@ class _HomeBody extends StatelessWidget {
                   );
                 },
               ),
-              onChanged: (value) {
-                Provider.of<RecipeViewModel>(context, listen: false).updateSearch(value);
-              },
-            ),
               const SizedBox(height: 16),
               Consumer<RecipeViewModel>(
               builder: (context, recipeVM, child) {
