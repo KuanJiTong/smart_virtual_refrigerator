@@ -44,23 +44,6 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final signout = Provider.of<LoginViewModel>(context, listen: false);
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text("Home Page"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.black),
-            onPressed: () async {
-              await signout.signOut();
-
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const LoginView()),
-              );
-            },
-            tooltip: 'Sign Out',
-          ),
-        ],
-      ),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: _pages[_selectedIndex],
@@ -93,6 +76,23 @@ class _HomeBody extends StatelessWidget {
     ingredientVM.fetchIngredients(signout.user?.uid ?? "");
 
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text("Home Page"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.black),
+            onPressed: () async {
+              await signout.signOut();
+
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const LoginView()),
+              );
+            },
+            tooltip: 'Sign Out',
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -141,36 +141,6 @@ class _HomeBody extends StatelessWidget {
                   );
                 },
               ),
-              onChanged: (value) {
-                Provider.of<RecipeViewModel>(context, listen: false).updateSearch(value);
-              },
-            ),
-              const SizedBox(height: 16),
-              Consumer<RecipeViewModel>(
-              builder: (context, recipeVM, child) {
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: recipeVM.categories.map((category) {
-                      final isSelected = recipeVM.selectedCategory == category;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: ChoiceChip(
-                          label: Text(category),
-                          selected: isSelected,
-                          onSelected: (_) => recipeVM.updateCategory(category),
-                          selectedColor: Colors.black,
-                          backgroundColor: Colors.grey[300],
-                          labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                );
-              },
-            ),
             const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
