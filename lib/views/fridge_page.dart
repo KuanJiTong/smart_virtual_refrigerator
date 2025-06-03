@@ -130,9 +130,9 @@ class FridgeViewBody extends StatelessWidget {
                         scrollDirection: Axis.horizontal,
                         children: vm.allLeftovers.map((leftover) {
                           return _leftoverCard(
-                            imagePath: 'assets/${leftover['image']}',
-                            title: leftover['title'],
-                            date: leftover['date'],
+                            imageUrl: 'assets/${leftover['imageUrl']}',
+                            name: leftover['name'],
+                            expiryDate: leftover['expiryDate'],
                             quantity: leftover['quantity'],
                           );
                         }).toList(),
@@ -179,7 +179,7 @@ class FridgeViewBody extends StatelessWidget {
                             return SizedBox(
                               width: cardWidth,
                               child: _ingredientCard(
-                                imagePath: 'assets/${ingredient['image']}',
+                                image: 'assets/${ingredient['image']}',
                                 quantity: ingredient['quantity'],
                                 name: ingredient['name'],
                                 expiredDate: ingredient['expiredDate'],
@@ -242,11 +242,30 @@ class FridgeViewBody extends StatelessWidget {
   }
 
   Widget _leftoverCard({
-    required String imagePath,
-    required String title,
-    required String date,
+    String? imageUrl,
+    required String name,
+    required String expiryDate,
     required int quantity,
   }) {
+    final fallbackImage = 'https://picsum.photos/seed/${name.hashCode}/100/100';
+
+    Widget imageWidget;
+    if (imageUrl != null && imageUrl.startsWith('assets/')) {
+      imageWidget = Image.asset(
+        imageUrl,
+        width: double.infinity,
+        height: 100,
+        fit: BoxFit.cover,
+      );
+    } else {
+      imageWidget = Image.network(
+        imageUrl?.isNotEmpty == true ? imageUrl! : fallbackImage,
+        width: double.infinity,
+        height: 100,
+        fit: BoxFit.cover,
+      );
+    }
+
     return Container(
       width: 180,
       margin: const EdgeInsets.only(right: 12),
@@ -257,12 +276,7 @@ class FridgeViewBody extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  imagePath,
-                  width: double.infinity,
-                  height: 100,
-                  fit: BoxFit.cover,
-                ),
+                child: imageWidget,
               ),
               Positioned(
                 top: 8,
@@ -280,19 +294,19 @@ class FridgeViewBody extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            title,
+            name,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             overflow: TextOverflow.ellipsis, // <-- Truncate with "..."
             maxLines: 1, // <-- Ensure it doesn't exceed 1 line
           ),
-          Text(date, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          Text(expiryDate, style: const TextStyle(color: Colors.grey, fontSize: 12)),
         ],
       ),
     );
   }
 
   Widget _ingredientCard({
-    required String imagePath,
+    required String image,
     required String quantity,
     required String name,
     required String expiredDate,

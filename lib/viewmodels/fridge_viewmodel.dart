@@ -33,10 +33,13 @@ class FridgeViewModel extends ChangeNotifier {
 
     try {
       allIngredients = await _firestoreService.fetchIngredients(userId);
+      allLeftovers = await _firestoreService.fetchLeftovers(userId);
       print('Fetched ingredients: $allIngredients');
+      print('Fetched leftovers: $allLeftovers');
     } catch (e) {
-      print('Error loading ingredients: $e');
+      print('Error loading data: $e');
       allIngredients = [];
+      allLeftovers = [];
     }
 
     isLoading = false;
@@ -48,7 +51,7 @@ class FridgeViewModel extends ChangeNotifier {
       final matchesCategory = selectedCategory == 'All' || item['category'] == selectedCategory;
       final matchesSearch = item['name'].toString().toLowerCase().contains(searchKeyword.toLowerCase());
       final matchesExpiry = expiryFilter == ExpiryFilter.all ||
-          (expiryFilter == ExpiryFilter.expiringSoon && item['daysLeftToExpire'] <= 2);
+          (expiryFilter == ExpiryFilter.expiringSoon && item['daysLeftToExpire'] <= 3);
       final matchesQuantity = quantityFilter == QuantityFilter.all ||
           (quantityFilter == QuantityFilter.lowStock && _isLowStock(item['quantity']));
 
