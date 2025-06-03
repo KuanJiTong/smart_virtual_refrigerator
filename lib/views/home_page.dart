@@ -98,7 +98,7 @@ class _HomeBody extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: ListView(
             children: [
-              _buildHeader(),
+              _buildHeader(context),
               const SizedBox(height: 20),
               TextField(
                 decoration: InputDecoration(
@@ -213,7 +213,10 @@ class _HomeBody extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final loginVM = Provider.of<LoginViewModel>(context, listen: false);
+    final displayName = loginVM.user?.displayName ?? 'Guest';
+
     return Row(
       children: [
         const CircleAvatar(
@@ -223,11 +226,11 @@ class _HomeBody extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Hello! 👋',
+              Text('Hello, $displayName 👋',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               Text('Welcome back', style: TextStyle(color: Colors.grey)),
             ],
