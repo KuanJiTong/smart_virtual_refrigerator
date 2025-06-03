@@ -33,7 +33,11 @@ class _AddLeftoverViewState extends State<AddLeftoverView> {
   }
 
   String _formatDate(DateTime date) {
-    return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    final year = date.year.toString();
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    
+    return '$year-$month-$day';
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -99,7 +103,7 @@ class _AddLeftoverViewState extends State<AddLeftoverView> {
 
     final leftover = Leftover(
       name: _nameController.text.trim(),
-      quantity: _quantityController.text.trim(),
+      quantity: int.tryParse(_quantityController.text.trim()) ?? 0,
       category: _selectedCategory,
       location: _selectedLocation,
       dateStored: DateTime.parse(_dateStoredController.text),

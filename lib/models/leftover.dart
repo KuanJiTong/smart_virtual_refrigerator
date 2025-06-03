@@ -1,6 +1,6 @@
 class Leftover {
   final String name;
-  final String quantity;
+  final int quantity;
   final String category;
   final String location;
   final DateTime dateStored;
@@ -25,10 +25,10 @@ class Leftover {
       'quantity': quantity,
       'category': category,
       'location': location,
-      'dateStored': dateStored.toIso8601String(),
-      'expiryDate': expiryDate?.toIso8601String(),
-      'notes': notes,
-      'imageUrl': imageUrl,
+      'dateStored': dateStored,
+      'expiryDate': expiryDate,
+      'notes': notes ?? '',
+      'imageUrl': imageUrl ?? '',
     };
   }
 
