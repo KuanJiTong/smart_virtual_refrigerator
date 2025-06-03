@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_virtual_refrigerator/models/leftover.dart';
+import 'package:smart_virtual_refrigerator/services/auth_service.dart';
 
 class LeftoverViewModel extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -17,6 +18,15 @@ class LeftoverViewModel extends ChangeNotifier {
   }
 
   Future<void> addLeftover(Leftover leftover) async {
-    await _db.collection('leftovers').add(leftover.toJson());
+    final userId = AuthService().userId;
+
+    if (userId == null) {
+      throw 'User is not logged in';
+    }
+
+    final dataWithUserId = leftover.toJson()
+      ..['userId'] = userId;
+
+    await _db.collection('leftovers').add(dataWithUserId);
   }
 }
