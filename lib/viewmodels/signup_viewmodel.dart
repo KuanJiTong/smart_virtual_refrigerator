@@ -37,7 +37,16 @@ class SignupViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await AuthService().signUpWithEmail(email, password);
+      final userCredential = await AuthService().signUpWithEmail(email, password);
+      final user = userCredential?.user;
+
+      if (user != null) {
+        await user.updateDisplayName(username);
+        await user.reload();
+      }
+
+      isLoading = false;
+      notifyListeners();
     } on FirebaseAuthException catch (e) {
       isLoading = false;
       notifyListeners();
@@ -48,6 +57,7 @@ class SignupViewModel extends ChangeNotifier {
       throw 'Something went wrong. Please try again.';
     }
   }
+
 
   Future<bool> signinWithGoogle() async {
     isLoading = true;
