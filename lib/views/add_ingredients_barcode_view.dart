@@ -278,7 +278,36 @@ class _AddIngredientsBarcodeViewState extends State<AddIngredientsBarcodeView> w
               ],
             ),
           ),
-
+          SafeArea(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 80.0),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddIngredientsView(
+                          initialName: null,
+                          imageUrl: null,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.edit),
+                  label: const Text("Add Manually"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
           // Instruction text
           SafeArea(
             child: Align(

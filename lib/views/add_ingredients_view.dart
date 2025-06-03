@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../viewmodels/add_ingredients_viewmodel.dart';
 import 'add_ingredients_barcode_view.dart';
@@ -18,37 +20,24 @@ class AddIngredientsView extends StatefulWidget {
 }
 
 class _AddIngredientsViewState extends State<AddIngredientsView> {
-  final TextEditingController nameController = TextEditingController(text: 'Massimo Sandwich Loaf');
-  final TextEditingController quantityController = TextEditingController(text: '12');
+  final TextEditingController nameController = TextEditingController(text: 'Ingredient Name');
+  final TextEditingController quantityController = TextEditingController(text: '10');
   final TextEditingController dateController = TextEditingController();
 
   bool hasExpiry = true;
   DateTime selectedDate = DateTime.now().add(Duration(days: 7));
+  File? _pickedImage;
 
   final List<String> categories = [
-    'Bread',
-    'Meat',
-    'Vegetable',
-    'Fruit',
-    'Dairy',
-    'Beverage',
-    'Spice',
-    'Grain',
-    'Condiment',
+    'Bread', 'Meat', 'Vegetable', 'Fruit', 'Dairy', 'Beverage', 'Spice', 'Grain', 'Condiment',
   ];
 
   String selectedCategory = 'Bread';
 
   final Map<String, String> unitMapping = {
-    'Bread': 'Slice',
-    'Meat': 'Gram',
-    'Vegetable': 'Gram',
-    'Fruit': 'Piece',
-    'Dairy': 'Milliliter',
-    'Beverage': 'Milliliter',
-    'Spice': 'Tablespoon',
-    'Grain': 'Gram',
-    'Condiment': 'Tablespoon',
+    'Bread': 'Slice', 'Meat': 'Gram', 'Vegetable': 'Gram', 'Fruit': 'Piece',
+    'Dairy': 'Milliliter', 'Beverage': 'Milliliter', 'Spice': 'Tablespoon',
+    'Grain': 'Gram', 'Condiment': 'Tablespoon',
   };
 
   @override
@@ -60,7 +49,7 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    FocusScope.of(context).unfocus(); // <--- Add this line
+    FocusScope.of(context).unfocus();
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate,
@@ -75,18 +64,27 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage != null) {
+      setState(() {
+        _pickedImage = File(pickedImage.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     String quantityUnit = unitMapping[selectedCategory] ?? 'Unit';
-    final ingredientVM = Provider.of<IngredientViewModel>(context);
+    final ingredientVM = Provider.of<AddIngredientViewModel>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Add Ingredient"),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AddIngredientsBarcodeView()))
-
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AddIngredientsBarcodeView())),
         ),
         elevation: 0,
       ),
@@ -95,13 +93,27 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
         child: ListView(
           children: [
             Center(
-              child: widget.imageUrl != null
+              child: _pickedImage != null
+                  ? Image.file(_pickedImage!, height: 180)
+                  : widget.imageUrl != null
                   ? Image.network(widget.imageUrl!, height: 180)
-                  : Image.network('https://placehold.co/600x400', height: 180),
+                  : Column(
+                children: [
+                  Image.network(
+                    'https://imageplaceholder.net/150x150',
+                    height: 180,
+                  ),
+                  SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    onPressed: _pickImage,
+                    icon: Icon(Icons.upload),
+                    label: Text("Upload Image"),
+                  ),
+                ],
+              ),
             ),
             SizedBox(height: 16),
-
-            /// Name
+            // Name
             TextFormField(
               controller: nameController,
               decoration: InputDecoration(
@@ -111,7 +123,7 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
             ),
             SizedBox(height: 16),
 
-            /// Expire Switch
+            // Expire Switch
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -126,7 +138,7 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
             ),
             SizedBox(height: 8),
 
-            /// Expiration Date
+            // Expiration Date
             if (hasExpiry)
               TextFormField(
                 controller: dateController,
@@ -139,7 +151,7 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
               ),
             SizedBox(height: 16),
 
-            /// Quantity
+            // Quantity
             Row(
               children: [
                 Expanded(
@@ -175,7 +187,7 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
             ),
             SizedBox(height: 16),
 
-            /// Category Dropdown
+            // Category
             DropdownButtonFormField<String>(
               value: selectedCategory,
               decoration: InputDecoration(
@@ -196,7 +208,7 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
             ),
             SizedBox(height: 32),
 
-            /// Add Button
+            // Add Button
             ElevatedButton(
               onPressed: () async {
                 ingredientVM.updateName(nameController.text);
@@ -206,34 +218,34 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
                 if (hasExpiry) {
                   ingredientVM.updateExpirationDate(selectedDate);
                 }
-                ingredientVM.setImage(widget.imageUrl ?? '');
+
+                // If image is picked locally, you'd want to upload it first and get the URL
+                if (_pickedImage != null) {
+                  // You need to implement your own image upload logic and get the imageUrl
+                  String uploadedImageUrl = await ingredientVM.uploadPickedImageToFirebase(_pickedImage!);
+                  ingredientVM.setImage(uploadedImageUrl);
+                } else {
+                  ingredientVM.setImage(widget.imageUrl ?? 'https://imageplaceholder.net/150x150');
+                }
 
                 await ingredientVM.addIngredientToFirebase();
 
-                // Optional: show success message
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Ingredient added to fridge')),
                 );
 
-                // Optionally navigate back
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const HomePage(initialIndex: 2)));
-
               },
-
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.yellow[700],
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                 padding: EdgeInsets.symmetric(vertical: 16),
               ),
-              child: Text(
-                "Add to Fridge",
-                style: TextStyle(fontSize: 16, color: Colors.black),
-              ),
-            )
+              child: Text("Add to Fridge", style: TextStyle(fontSize: 16, color: Colors.black)),
+            ),
           ],
         ),
       ),
     );
   }
 }
-

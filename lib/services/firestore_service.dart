@@ -49,7 +49,7 @@ class FirestoreService {
       'daysLeftToExpire': daysLeft,
     };
 
-    await _firestore.collection('fridge').add(ingredientData);
+    await _firestore.collection('ingredients').add(ingredientData);
   }
 
   String _getUnit(String category) {
