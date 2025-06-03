@@ -6,8 +6,14 @@ import '../../services/auth_service.dart';
 class SignupViewModel extends ChangeNotifier {
   String email = '';
   String password = '';
+  String username = '';
   bool isChecked = false;
   bool isLoading = false;
+
+  void setUsername(String val) {
+    username = val;
+    notifyListeners();
+  }
 
   void setEmail(String val) {
     email = val;
