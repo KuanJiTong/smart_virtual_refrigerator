@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_virtual_refrigerator/views/add_leftover_view.dart';
 import '../viewmodels/fridge_viewmodel.dart';
 import 'add_ingredients_barcode_view.dart';
 import 'leftovers_page.dart';
@@ -211,8 +212,10 @@ class FridgeViewBody extends StatelessWidget {
                             title: const Text('Add Leftovers'),
                             onTap: () {
                               Navigator.pop(context);
-                              // Add your navigation or logic here
-                              print('Add Leftovers tapped');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => AddLeftoverView()),
+                              );
                             },
                           ),
                           ListTile(
