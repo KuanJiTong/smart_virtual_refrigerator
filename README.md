@@ -1,16 +1,21 @@
-# smart_virtual_refrigerator
+# Flutter App Setup Guide
 
-A new Flutter project.
+## 🔐 Environment Configuration
 
-## Getting Started
+To keep sensitive data like API keys secure and out of version control, this project uses a `.env` file.
 
-This project is a starting point for a Flutter application.
+### 📄 Step 1: Create a `.env` File
 
-A few resources to get you started if this is your first Flutter project:
+At the **root** directory of the project (same level as `pubspec.yaml`), create a file named:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+.env
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
+### ✍️ Step 2: Add the API Key
+
+Inside the `.env` file, add your **Barcode Lookup API key** like this:
+
+BARCODE_LOOKUP_API_KEY=kxegjzl7vm6ks1quwzghanu9mzhb4l
+
+
+> ⚠️ **Do NOT commit this file to version control.** The `.gitignore` file is already configured to ignore `.env`.

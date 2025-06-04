@@ -243,7 +243,7 @@ class _HomeBody extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Hello! 👋',
+              Text('Hello, $displayName 👋',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               Text('Welcome back, $userName' , style: TextStyle(color: Colors.grey)),
             ],

@@ -7,8 +7,14 @@ import '../../services/auth_service.dart';
 class SignupViewModel extends ChangeNotifier {
   String email = '';
   String password = '';
+  String username = '';
   bool isChecked = false;
   bool isLoading = false;
+
+  void setUsername(String val) {
+    username = val;
+    notifyListeners();
+  }
 
   void setEmail(String val) {
     email = val;
@@ -49,6 +55,7 @@ class SignupViewModel extends ChangeNotifier {
       throw 'Something went wrong. Please try again.';
     }
   }
+
 
   Future<bool> signinWithGoogle() async {
     isLoading = true;
