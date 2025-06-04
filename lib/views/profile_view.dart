@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_virtual_refrigerator/viewmodels/profile_viewmode.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/profile_viewmodel.dart';
 
 class ManageProfilePage extends StatelessWidget {
   const ManageProfilePage({super.key});

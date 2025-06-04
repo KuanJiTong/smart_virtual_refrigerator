@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_virtual_refrigerator/models/ingredient.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/ingredient_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/login_viewmodel.dart';
-import 'package:smart_virtual_refrigerator/viewmodels/profile_viewmode.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/profile_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/views/profile_view.dart';
 import '../views/login_view.dart';
 import 'fridge_page.dart'; // Make sure this path is correct
@@ -243,7 +243,7 @@ class _HomeBody extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Hello, $displayName 👋',
+              Text('Hello, $userName 👋',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               Text('Welcome back, $userName' , style: TextStyle(color: Colors.grey)),
             ],
