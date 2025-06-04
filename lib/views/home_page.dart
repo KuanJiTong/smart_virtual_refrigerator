@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:smart_virtual_refrigerator/models/ingredient.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/ingredient_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/login_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/profile_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/views/profile_view.dart';
 import '../views/login_view.dart';
 import 'fridge_page.dart'; // Make sure this path is correct
 import 'package:smart_virtual_refrigerator/viewmodels/recipe_viewmodel.dart';
@@ -70,6 +72,7 @@ class _HomeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     final signout = Provider.of<LoginViewModel>(context, listen: false);
     final recipeVM = Provider.of<RecipeViewModel>(context);
     final ingredientVM = Provider.of<IngredientViewModel>(context);
@@ -98,7 +101,7 @@ class _HomeBody extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: ListView(
             children: [
-              _buildHeader(),
+              _buildHeader(context),
               const SizedBox(height: 20),
               TextField(
                 decoration: InputDecoration(
@@ -213,23 +216,36 @@ class _HomeBody extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final profileVM = Provider.of<ProfileViewModel>(context);
+    profileVM.loadUserData();
+    final userName = profileVM.user?.name ?? 'Guest';
+    final imageUrl = profileVM.user?.imageUrl;
+
     return Row(
       children: [
-        const CircleAvatar(
-          radius: 24,
-          backgroundImage: NetworkImage(
-            'https://p3-pc-sign.douyinpic.com/tos-cn-i-0813/oEI5tAfqNcIAkc9BAxgeENFEYGA6AnxjDAAXCh~tplv-dy-aweme-images:q75.webp?biz_tag=aweme_images&from=327834062&lk3s=138a59ce&s=PackSourceEnum_SEARCH&sc=image&se=false&x-expires=1750053600&x-signature=lH4UpxReCL0OQMJMLP9eRWASGMI%3D',
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ManageProfilePage()),
+            );
+          },
+          child: CircleAvatar(
+            radius: 24,
+            backgroundImage: NetworkImage(
+              imageUrl ?? 'https://p3-pc-sign.douyinpic.com/tos-cn-i-0813/oEI5tAfqNcIAkc9BAxgeENFEYGA6AnxjDAAXCh~tplv-dy-aweme-images:q75.webp?biz_tag=aweme_images&from=327834062&lk3s=138a59ce&s=PackSourceEnum_SEARCH&sc=image&se=false&x-expires=1750053600&x-signature=lH4UpxReCL0OQMJMLP9eRWASGMI%3D',
+            ),
           ),
         ),
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Hello! 👋',
+              Text('Hello, $userName 👋',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              Text('Welcome back', style: TextStyle(color: Colors.grey)),
+              Text('Welcome back, $userName' , style: TextStyle(color: Colors.grey)),
             ],
           ),
         ),

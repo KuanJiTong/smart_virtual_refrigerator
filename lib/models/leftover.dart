@@ -25,10 +25,10 @@ class Leftover {
       'quantity': quantity,
       'category': category,
       'location': location,
-      'dateStored': dateStored,
-      'expiryDate': expiryDate,
-      'notes': notes ?? '',
-      'imageUrl': imageUrl ?? '',
+      'dateStored': dateStored.toIso8601String(),
+      'expiryDate': expiryDate?.toIso8601String(),
+      'notes': notes,
+      'imageUrl': imageUrl,
     };
   }
 

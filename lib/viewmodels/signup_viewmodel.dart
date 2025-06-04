@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
@@ -6,8 +7,14 @@ import '../../services/auth_service.dart';
 class SignupViewModel extends ChangeNotifier {
   String email = '';
   String password = '';
+  String username = '';
   bool isChecked = false;
   bool isLoading = false;
+
+  void setUsername(String val) {
+    username = val;
+    notifyListeners();
+  }
 
   void setEmail(String val) {
     email = val;
@@ -31,7 +38,13 @@ class SignupViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await AuthService().signUpWithEmail(email, password);
+      final userCredential = await AuthService().signUpWithEmail(email, password);
+      final user = userCredential?.user; 
+      await FirebaseFirestore.instance.collection('users').doc(user!.uid).set({
+        'name': 'New User',     
+        'email': user.email,
+        'imageUrl': null,
+      });
     } on FirebaseAuthException catch (e) {
       isLoading = false;
       notifyListeners();
@@ -43,12 +56,26 @@ class SignupViewModel extends ChangeNotifier {
     }
   }
 
+
   Future<bool> signinWithGoogle() async {
     isLoading = true;
 
     notifyListeners();
 
     final userCredential = await AuthService().signInWithGoogle();
+    final user = userCredential?.user; 
+    
+    if (user != null) {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+
+      if (!userDoc.exists) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'name': user.displayName ?? '',
+          'email': user.email,
+          'imageUrl': user.photoURL,
+        });
+      }
+    }
 
     isLoading = false;
     notifyListeners();
