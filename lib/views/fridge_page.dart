@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_virtual_refrigerator/views/update_ingredients_view.dart';
 import 'package:smart_virtual_refrigerator/views/add_leftover_view.dart';
+import 'package:smart_virtual_refrigerator/views/update_leftover_view.dart';
 
 import '../viewmodels/fridge_viewmodel.dart';
 import 'add_ingredients_barcode_view.dart';
@@ -140,6 +141,7 @@ class FridgeViewBody extends StatelessWidget {
                             quantity: leftover['quantity'],
                           );
                         }).toList(),
+                        
                       ),
                     ),
 
@@ -154,7 +156,6 @@ class FridgeViewBody extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-
                     
                     // Category Filter Chips
                     Wrap(
@@ -259,7 +260,7 @@ class FridgeViewBody extends StatelessWidget {
     String? imageUrl,
     required String name,
     required String expiryDate,
-    required int quantity,
+    required int quantity, 
   }) {
 
     Widget imageWidget;

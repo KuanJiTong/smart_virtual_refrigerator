@@ -121,4 +121,23 @@ class FridgeViewModel extends ChangeNotifier {
     isLoading = loading;
     notifyListeners();
   }
+
+  Future<void> loadLeftovers() async {
+    final userId = _authService.userId;
+    if (userId == null) {
+      print('No userId found');
+      return;
+    }
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      allLeftovers = await _firestoreService.fetchLeftovers(userId);
+      print('Fetched leftovers: $allLeftovers');
+    } catch (e) {
+      print('Error loading data: $e');
+      allLeftovers = [];
+    }
+  }
 }

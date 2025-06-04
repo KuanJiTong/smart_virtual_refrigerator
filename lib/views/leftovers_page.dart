@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_virtual_refrigerator/views/update_leftover_view.dart';
 import '../viewmodels/fridge_viewmodel.dart';
 
 class LeftoversPage extends StatelessWidget {
@@ -22,6 +23,15 @@ class LeftoversPage extends StatelessWidget {
             final leftover = leftovers[index];
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
+              child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => UpdateLeftoverView(leftover: leftover),
+                  ),
+                );
+              },
               child: Row(
                 children: [
                   ClipRRect(
@@ -45,7 +55,10 @@ class LeftoversPage extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
-                        Text(leftover['expiryDate'], style: const TextStyle(color: Colors.grey)),
+                        Text(
+                          leftover['expiryDate'],
+                          style: const TextStyle(color: Colors.grey),
+                        ),
                       ],
                     ),
                   ),
@@ -55,6 +68,7 @@ class LeftoversPage extends StatelessWidget {
                   ),
                 ],
               ),
+            ),            
             );
           },
         ),

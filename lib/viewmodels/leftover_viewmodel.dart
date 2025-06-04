@@ -29,4 +29,19 @@ class LeftoverViewModel extends ChangeNotifier {
 
     await _db.collection('leftovers').add(dataWithUserId);
   }
+
+  Future<void> updateLeftover(String docId, Leftover leftover) async {
+    await _db.collection('leftovers').doc(docId).update(leftover.toJson());
+  }
+
+  // Delete leftover by ID
+  Future<void> deleteLeftover(String id) async {
+    try {
+      await _db.collection('leftovers').doc(id).delete();
+      notifyListeners();
+    } catch (e) {
+      throw Exception("Failed to delete leftover: $e");
+    }
+  }
+
 }
