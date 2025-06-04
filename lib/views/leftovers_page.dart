@@ -35,7 +35,7 @@ class _LeftoversPageState extends State<LeftoversPage> {
           itemCount: leftovers.length,
           itemBuilder: (context, index) {
             final leftover = leftovers[index];
-            final imageUrl = leftover['imageUrl'] as String?;
+            final imageUrl = (leftover['imageUrl'] as String?) ?? '';
 
             return Container(
               margin: const EdgeInsets.only(bottom: 12),

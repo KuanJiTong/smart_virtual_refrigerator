@@ -151,7 +151,7 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
                         scrollDirection: Axis.horizontal,
                         children: vm.allLeftovers.map((leftover) {
                           return _leftoverCard(
-                            imageUrl: 'assets/${leftover['imageUrl']}',
+                            imageUrl: '${leftover['imageUrl'] ?? ''}',
                             name: leftover['name'],
                             expiryDate: leftover['expiryDate'],
                             quantity: leftover['quantity'],
