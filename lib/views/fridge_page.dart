@@ -258,58 +258,75 @@ class FridgeViewBody extends StatelessWidget {
   }
 
   Widget _leftoverCard({
-    String? imageUrl,
-    required String name,
-    required String expiryDate,
-    required int quantity,
-  }) {
+  String? imageUrl,
+  required String name,
+  required String expiryDate,
+  required int quantity,
+}) {
+  Widget imageWidget;
 
-    Widget imageWidget;
+  if (imageUrl != null && imageUrl.isNotEmpty) {
     imageWidget = Image.network(
-      'https://picsum.photos/seed/${name.hashCode}/100/100',
+      imageUrl,
       width: double.infinity,
       height: 100,
       fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          width: double.infinity,
+          height: 100,
+          color: Colors.grey[300],
+          child: const Icon(Icons.broken_image, size: 40),
+        );
+      },
     );
-
-    return Container(
-      width: 180,
-      margin: const EdgeInsets.only(right: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: imageWidget,
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(quantity.toString()),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            name,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-            overflow: TextOverflow.ellipsis, // <-- Truncate with "..."
-            maxLines: 1, // <-- Ensure it doesn't exceed 1 line
-          ),
-          Text(expiryDate, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-        ],
-      ),
+  } else {
+    imageWidget = Container(
+      width: double.infinity,
+      height: 100,
+      color: Colors.grey[300],
+      child: const Icon(Icons.image_not_supported, size: 40),
     );
   }
+
+  return Container(
+    width: 180,
+    margin: const EdgeInsets.only(right: 12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: imageWidget,
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(quantity.toString()),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          name,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
+        Text(expiryDate, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+      ],
+    ),
+  );
+}
 
   Widget _ingredientCard({
     required String id,

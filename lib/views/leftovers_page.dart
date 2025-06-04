@@ -20,18 +20,25 @@ class LeftoversPage extends StatelessWidget {
           itemCount: leftovers.length,
           itemBuilder: (context, index) {
             final leftover = leftovers[index];
+            final imageUrl = leftover['imageUrl'] as String?;
+
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
               child: Row(
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      'https://picsum.photos/seed/${leftover['name'].hashCode}/80/80',
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                    ),
+                    child: imageUrl != null && imageUrl.isNotEmpty
+                        ? Image.network(
+                            imageUrl,
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return _placeholderImage();
+                            },
+                          )
+                        : _placeholderImage(),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -59,6 +66,16 @@ class LeftoversPage extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+
+  // Placeholder widget for missing or invalid images
+  Widget _placeholderImage() {
+    return Container(
+      width: 80,
+      height: 80,
+      color: Colors.grey[300],
+      child: const Icon(Icons.image_not_supported, size: 40),
     );
   }
 }
