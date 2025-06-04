@@ -246,37 +246,35 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
                     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   ),
                   builder: (context) {
-                    return Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Wrap(
-                        children: [
-                          ListTile(
-                            leading: const Icon(Icons.dinner_dining),
-                            title: const Text('Add Leftovers'),
-                            onTap: () async {
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const AddLeftoverView()),
-                              );
-
-                              if (result == true) {
-                                vm.loadIngredients();
-                              }
-                              Navigator.pop(context);
-                            },
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.shopping_basket),
-                            title: const Text('Add Ingredients'),
-                            onTap: () {
-                              Navigator.pop(context); // Close the drawer or current modal if needed
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => AddIngredientsBarcodeView()),
-                              );
-                            },
-                          ),
-                        ],
+                    return SafeArea( // <-- Added SafeArea here
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Wrap(
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.dinner_dining),
+                              title: const Text('Add Leftovers'),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => AddLeftoverView()),
+                                );
+                              },
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.shopping_basket),
+                              title: const Text('Add Ingredients'),
+                              onTap: () {
+                                Navigator.pop(context); // Close the drawer or current modal if needed
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => AddIngredientsBarcodeView()),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -289,20 +287,36 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
   }
 
   Widget _leftoverCard({
-    String? imageUrl,
-    required String name,
-    required String expiryDate,
-    required int quantity, 
-    required VoidCallback onTap,
-  }) {
+  String? imageUrl,
+  required String name,
+  required String expiryDate,
+  required int quantity,
+}) {
+  Widget imageWidget;
 
-    Widget imageWidget;
+  if (imageUrl != null && imageUrl.isNotEmpty) {
     imageWidget = Image.network(
-      'https://picsum.photos/seed/${name.hashCode}/100/100',
+      imageUrl,
       width: double.infinity,
       height: 100,
       fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          width: double.infinity,
+          height: 100,
+          color: Colors.grey[300],
+          child: const Icon(Icons.broken_image, size: 40),
+        );
+      },
     );
+  } else {
+    imageWidget = Container(
+      width: double.infinity,
+      height: 100,
+      color: Colors.grey[300],
+      child: const Icon(Icons.image_not_supported, size: 40),
+    );
+  }
 
     return InkWell(
       onTap: onTap,
@@ -409,106 +423,108 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
       });
     }
   
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: ListView(
-        shrinkWrap: true,
-        children: [
-          const Text('Filters', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          const Text('Expiry'),
-          Wrap(
-            spacing: 8,
-            children: ExpiryFilter.values.map((filter) {
-              return ChoiceChip(
-                label: Text(filter == ExpiryFilter.all ? 'All' : 'Expiring Soon'),
-                selected: vm.expiryFilter == filter,
-                onSelected: (_) {
-                  refreshAndReopen(context, () => vm.setExpiryFilter(filter));
-                },
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 16),
-          const Text('Quantity'),
-          Wrap(
-            spacing: 8,
-            children: QuantityFilter.values.map((filter) {
-              return ChoiceChip(
-                label: Text(filter == QuantityFilter.all ? 'All' : 'Low Stock'),
-                selected: vm.quantityFilter == filter,
-                onSelected: (_) {
-                  refreshAndReopen(context, () => vm.setQuantityFilter(filter));
-                },
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 16),
-          const Text('Sort By'),
-          Wrap(
-            spacing: 8,
-            children: SortOrder.values.map((order) {
-              String label;
-              switch (order) {
-                case SortOrder.nameAZ:
-                  label = 'Name A-Z';
-                  break;
-                case SortOrder.expirySoonest:
-                  label = 'Expiry Soonest';
-                  break;
-                case SortOrder.quantityHighToLow:
-                  label = 'Quantity High → Low';
-                  break;
-              }
-
-              return ChoiceChip(
-                label: Text(label),
-                selected: vm.sortOrder == order,
-                onSelected: (_) {
-                  refreshAndReopen(context, () => vm.setSortOrder(order));
-                },
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    elevation: 4,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text('Apply Filters'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    refreshAndReopen(context, () => vm.clearFilters());
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            const Text('Filters', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            const Text('Expiry'),
+            Wrap(
+              spacing: 8,
+              children: ExpiryFilter.values.map((filter) {
+                return ChoiceChip(
+                  label: Text(filter == ExpiryFilter.all ? 'All' : 'Expiring Soon'),
+                  selected: vm.expiryFilter == filter,
+                  onSelected: (_) {
+                    refreshAndReopen(context, () => vm.setExpiryFilter(filter));
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    elevation: 4,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+            const Text('Quantity'),
+            Wrap(
+              spacing: 8,
+              children: QuantityFilter.values.map((filter) {
+                return ChoiceChip(
+                  label: Text(filter == QuantityFilter.all ? 'All' : 'Low Stock'),
+                  selected: vm.quantityFilter == filter,
+                  onSelected: (_) {
+                    refreshAndReopen(context, () => vm.setQuantityFilter(filter));
+                  },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+            const Text('Sort By'),
+            Wrap(
+              spacing: 8,
+              children: SortOrder.values.map((order) {
+                String label;
+                switch (order) {
+                  case SortOrder.nameAZ:
+                    label = 'Name A-Z';
+                    break;
+                  case SortOrder.expirySoonest:
+                    label = 'Expiry Soonest';
+                    break;
+                  case SortOrder.quantityHighToLow:
+                    label = 'Quantity High → Low';
+                    break;
+                }
+
+                return ChoiceChip(
+                  label: Text(label),
+                  selected: vm.sortOrder == order,
+                  onSelected: (_) {
+                    refreshAndReopen(context, () => vm.setSortOrder(order));
+                  },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      elevation: 4,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
+                    child: const Text('Apply Filters'),
                   ),
-                  child: const Text('Clear Filters'),
                 ),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      refreshAndReopen(context, () => vm.clearFilters());
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      elevation: 4,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Clear Filters'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
