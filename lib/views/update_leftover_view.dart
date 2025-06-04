@@ -110,7 +110,7 @@ class _UpdateLeftoverViewState extends State<UpdateLeftoverView> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Leftover updated successfully")),
     );
-    Navigator.pop(context);
+    Navigator.pop(context,true);
   }
 
   Future<void> _deleteLeftover() async {
@@ -137,7 +137,7 @@ class _UpdateLeftoverViewState extends State<UpdateLeftoverView> {
       final leftoverVM = Provider.of<LeftoverViewModel>(context, listen: false);
       try {
         await leftoverVM.deleteLeftover(_id);
-        Navigator.of(context).pop(true); 
+        Navigator.pop(context,true);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
       } finally {

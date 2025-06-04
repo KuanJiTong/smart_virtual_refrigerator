@@ -3,9 +3,23 @@ import 'package:provider/provider.dart';
 import 'package:smart_virtual_refrigerator/views/update_leftover_view.dart';
 import '../viewmodels/fridge_viewmodel.dart';
 
-class LeftoversPage extends StatelessWidget {
+class LeftoversPage extends StatefulWidget {
   final List<Map<String, dynamic>> leftovers;
+
   const LeftoversPage({super.key, required this.leftovers});
+
+  @override
+  State<LeftoversPage> createState() => _LeftoversPageState();
+}
+
+class _LeftoversPageState extends State<LeftoversPage> {
+  late List<Map<String, dynamic>> leftovers;
+
+  @override
+  void initState() {
+    super.initState();
+    leftovers = widget.leftovers;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +38,17 @@ class LeftoversPage extends StatelessWidget {
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
               child: InkWell(
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => UpdateLeftoverView(leftover: leftover),
                   ),
                 );
+
+                if (result == true) {
+                  Navigator.pop(context, true);
+                }
               },
               child: Row(
                 children: [
