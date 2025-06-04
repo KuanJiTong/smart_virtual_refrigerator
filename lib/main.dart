@@ -6,6 +6,7 @@ import 'package:smart_virtual_refrigerator/viewmodels/add_ingredients_viewmodel.
 import 'package:smart_virtual_refrigerator/viewmodels/forgot_password_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/fridge_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/leftover_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/profile_viewmode.dart';
 import 'package:smart_virtual_refrigerator/views/add_ingredients_barcode_view.dart';
 import 'package:smart_virtual_refrigerator/views/add_ingredients_view.dart';
 import 'package:smart_virtual_refrigerator/views/signup_view.dart';
@@ -82,6 +83,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => SignupViewModel()),
         ChangeNotifierProvider(create: (_) => LoginViewModel()),
         ChangeNotifierProvider(create: (_) => ForgotPasswordViewModel()),
+        ChangeNotifierProvider(create: (_) => ProfileViewModel()),
         ChangeNotifierProvider(create: (_) => FridgeViewModel()),
         ChangeNotifierProvider(create: (_) => AddIngredientViewModel()),
         ChangeNotifierProvider(create: (_) => IngredientViewModel()),
