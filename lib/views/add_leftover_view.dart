@@ -119,7 +119,7 @@ class _AddLeftoverViewState extends State<AddLeftoverView> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Leftover added successfully")),
     );
-    Navigator.pop(context);
+    Navigator.pop(context,true);
   }
 
   Widget _styledTextField({

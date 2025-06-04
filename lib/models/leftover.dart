@@ -25,11 +25,19 @@ class Leftover {
       'quantity': quantity,
       'category': category,
       'location': location,
-      'dateStored': dateStored.toIso8601String(),
-      'expiryDate': expiryDate?.toIso8601String(),
+      'dateStored': _formatDate(dateStored),
+      'expiryDate': _formatDate(expiryDate!),
       'notes': notes,
       'imageUrl': imageUrl,
     };
+  }
+
+  String _formatDate(DateTime date) {
+    final year = date.year.toString();
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    
+    return '$year-$month-$day';
   }
 
   factory Leftover.fromJson(Map<String, dynamic> json) {

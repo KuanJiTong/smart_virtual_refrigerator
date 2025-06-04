@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/leftover_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/views/update_ingredients_view.dart';
 import 'package:smart_virtual_refrigerator/views/add_leftover_view.dart';
+import 'package:smart_virtual_refrigerator/views/update_leftover_view.dart';
 
 import '../viewmodels/fridge_viewmodel.dart';
 import 'add_ingredients_barcode_view.dart';
 import 'leftovers_page.dart';
 import '../services/auth_service.dart';
 
-class FridgePage extends StatelessWidget {
+class FridgePage extends StatefulWidget {
   const FridgePage({super.key});
 
+  @override
+  State<FridgePage> createState() => _FridgePageState();
+}
+
+class _FridgePageState extends State<FridgePage> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -22,15 +29,21 @@ class FridgePage extends StatelessWidget {
             vm.loadIngredients();
           }
 
-          return const FridgeViewBody();
+          return FridgeViewBody();
         },
       ),
     );
   }
 }
 
-class FridgeViewBody extends StatelessWidget {
+class FridgeViewBody extends StatefulWidget {
   const FridgeViewBody({super.key});
+
+  @override
+  State<FridgeViewBody> createState() => _FridgeViewBodyState();
+}
+
+class _FridgeViewBodyState extends State<FridgeViewBody> {
 
   @override
   Widget build(BuildContext context) {
@@ -113,13 +126,17 @@ class FridgeViewBody extends StatelessWidget {
                             Text('${vm.allLeftovers.length} items', style: const TextStyle(color: Colors.grey)),
                             if (vm.allLeftovers.length > 3)
                               TextButton(
-                                onPressed: () {
-                                  Navigator.push(
+                                onPressed: () async {
+                                  final shouldReload = await Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => LeftoversPage(leftovers: vm.allLeftovers),
+                                      builder: (context) => LeftoversPage(leftovers: vm.allLeftovers),
                                     ),
                                   );
+
+                                  if (shouldReload == true) {
+                                    vm.loadIngredients();
+                                  }
                                 },
                                 child: const Text('View All'),
                               ),
@@ -138,8 +155,21 @@ class FridgeViewBody extends StatelessWidget {
                             name: leftover['name'],
                             expiryDate: leftover['expiryDate'],
                             quantity: leftover['quantity'],
+                            onTap: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => UpdateLeftoverView(leftover: leftover),
+                                ),
+                              );
+
+                              if (result == true) {
+                                vm.loadIngredients();
+                              }
+                            }
                           );
                         }).toList(),
+                        
                       ),
                     ),
 
@@ -154,7 +184,6 @@ class FridgeViewBody extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-
                     
                     // Category Filter Chips
                     Wrap(
@@ -289,44 +318,47 @@ class FridgeViewBody extends StatelessWidget {
     );
   }
 
-  return Container(
-    width: 180,
-    margin: const EdgeInsets.only(right: 12),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Stack(
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: 180,
+        margin: const EdgeInsets.only(right: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: imageWidget,
-            ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: imageWidget,
                 ),
-                child: Text(quantity.toString()),
-              ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(quantity.toString()),
+                  ),
+                ),
+              ],
             ),
+            const SizedBox(height: 8),
+            Text(
+              name,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              overflow: TextOverflow.ellipsis, // <-- Truncate with "..."
+              maxLines: 1, // <-- Ensure it doesn't exceed 1 line
+            ),
+            Text(expiryDate, style: const TextStyle(color: Colors.grey, fontSize: 12)),
           ],
         ),
-        const SizedBox(height: 8),
-        Text(
-          name,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-        ),
-        Text(expiryDate, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-      ],
-    ),
-  );
-}
+      ),
+    );
+  }
 
   Widget _ingredientCard({
     required String id,
