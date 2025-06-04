@@ -39,9 +39,10 @@ class SignupViewModel extends ChangeNotifier {
 
     try {
       final userCredential = await AuthService().signUpWithEmail(email, password);
-      final user = userCredential?.user; 
+      final user = userCredential?.user;
+
       await FirebaseFirestore.instance.collection('users').doc(user!.uid).set({
-        'name': 'New User',     
+        'name': username,
         'email': user.email,
         'imageUrl': null,
       });
