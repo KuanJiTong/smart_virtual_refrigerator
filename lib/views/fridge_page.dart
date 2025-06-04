@@ -291,6 +291,7 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
   required String name,
   required String expiryDate,
   required int quantity,
+  required VoidCallback onTap,
 }) {
   Widget imageWidget;
 
