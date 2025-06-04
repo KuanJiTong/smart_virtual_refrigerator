@@ -116,7 +116,9 @@ class FridgeViewBody extends StatelessWidget {
                                 onPressed: () {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (_) => const LeftoversPage()),
+                                    MaterialPageRoute(
+                                      builder: (_) => LeftoversPage(leftovers: vm.allLeftovers),
+                                    ),
                                   );
                                 },
                                 child: const Text('View All'),
@@ -132,9 +134,9 @@ class FridgeViewBody extends StatelessWidget {
                         scrollDirection: Axis.horizontal,
                         children: vm.allLeftovers.map((leftover) {
                           return _leftoverCard(
-                            imagePath: 'assets/${leftover['image']}',
-                            title: leftover['title'],
-                            date: leftover['date'],
+                            imageUrl: 'assets/${leftover['imageUrl']}',
+                            name: leftover['name'],
+                            expiryDate: leftover['expiryDate'],
                             quantity: leftover['quantity'],
                           );
                         }).toList(),
@@ -220,7 +222,7 @@ class FridgeViewBody extends StatelessWidget {
                       child: Wrap(
                         children: [
                           ListTile(
-                            leading: const Icon(Icons.food_bank),
+                            leading: const Icon(Icons.dinner_dining),
                             title: const Text('Add Leftovers'),
                             onTap: () {
                               Navigator.pop(context);
@@ -231,8 +233,8 @@ class FridgeViewBody extends StatelessWidget {
                             },
                           ),
                           ListTile(
-                            leading: const Icon(Icons.qr_code_scanner),
-                            title: const Text('Scan Barcode'),
+                            leading: const Icon(Icons.shopping_basket),
+                            title: const Text('Add Ingredients'),
                             onTap: () {
                               Navigator.pop(context); // Close the drawer or current modal if needed
                               Navigator.push(
@@ -254,11 +256,20 @@ class FridgeViewBody extends StatelessWidget {
   }
 
   Widget _leftoverCard({
-    required String imagePath,
-    required String title,
-    required String date,
+    String? imageUrl,
+    required String name,
+    required String expiryDate,
     required int quantity,
   }) {
+
+    Widget imageWidget;
+    imageWidget = Image.network(
+      'https://picsum.photos/seed/${name.hashCode}/100/100',
+      width: double.infinity,
+      height: 100,
+      fit: BoxFit.cover,
+    );
+
     return Container(
       width: 180,
       margin: const EdgeInsets.only(right: 12),
@@ -269,12 +280,7 @@ class FridgeViewBody extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  imagePath,
-                  width: double.infinity,
-                  height: 100,
-                  fit: BoxFit.cover,
-                ),
+                child: imageWidget,
               ),
               Positioned(
                 top: 8,
@@ -292,12 +298,12 @@ class FridgeViewBody extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            title,
+            name,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             overflow: TextOverflow.ellipsis, // <-- Truncate with "..."
             maxLines: 1, // <-- Ensure it doesn't exceed 1 line
           ),
-          Text(date, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          Text(expiryDate, style: const TextStyle(color: Colors.grey, fontSize: 12)),
         ],
       ),
     );
@@ -347,15 +353,31 @@ class FridgeViewBody extends StatelessWidget {
     );
   }
 
+  Widget _buildFilterSheet(BuildContext context, FridgeViewModel vm) {
+    void refreshAndReopen(BuildContext context, void Function() updateFilter) {
+      updateFilter();
+      Navigator.pop(context);
 
-  Widget _buildFilterSheet(BuildContext context, FridgeViewModel vm) {  
+      // Delay to allow UI refresh before reopening modal
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          showModalBottomSheet(
+            context: context,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            builder: (newContext) => _buildFilterSheet(newContext, vm),
+          );
+        }
+      });
+    }
+  
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView(
         shrinkWrap: true,
         children: [
           const Text('Filters', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-
           const SizedBox(height: 16),
           const Text('Expiry'),
           Wrap(
@@ -364,11 +386,12 @@ class FridgeViewBody extends StatelessWidget {
               return ChoiceChip(
                 label: Text(filter == ExpiryFilter.all ? 'All' : 'Expiring Soon'),
                 selected: vm.expiryFilter == filter,
-                onSelected: (_) => vm.setExpiryFilter(filter),
+                onSelected: (_) {
+                  refreshAndReopen(context, () => vm.setExpiryFilter(filter));
+                },
               );
             }).toList(),
           ),
-
           const SizedBox(height: 16),
           const Text('Quantity'),
           Wrap(
@@ -377,11 +400,12 @@ class FridgeViewBody extends StatelessWidget {
               return ChoiceChip(
                 label: Text(filter == QuantityFilter.all ? 'All' : 'Low Stock'),
                 selected: vm.quantityFilter == filter,
-                onSelected: (_) => vm.setQuantityFilter(filter),
+                onSelected: (_) {
+                  refreshAndReopen(context, () => vm.setQuantityFilter(filter));
+                },
               );
             }).toList(),
           ),
-
           const SizedBox(height: 16),
           const Text('Sort By'),
           Wrap(
@@ -403,11 +427,12 @@ class FridgeViewBody extends StatelessWidget {
               return ChoiceChip(
                 label: Text(label),
                 selected: vm.sortOrder == order,
-                onSelected: (_) => vm.setSortOrder(order),
+                onSelected: (_) {
+                  refreshAndReopen(context, () => vm.setSortOrder(order));
+                },
               );
             }).toList(),
           ),
-
           const SizedBox(height: 24),
           Row(
             children: [
@@ -426,15 +451,11 @@ class FridgeViewBody extends StatelessWidget {
                   child: const Text('Apply Filters'),
                 ),
               ),
-
               const SizedBox(width: 12),
-
-              // Clear Filters Button – styled identically
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    vm.clearFilters();
-                    Navigator.pop(context);
+                    refreshAndReopen(context, () => vm.clearFilters());
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
@@ -443,9 +464,7 @@ class FridgeViewBody extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: BorderSide.none, // Remove any border
                     ),
-                    shadowColor: Colors.black26,
                   ),
                   child: const Text('Clear Filters'),
                 ),

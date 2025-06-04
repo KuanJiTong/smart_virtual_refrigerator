@@ -117,4 +117,31 @@ class FirestoreService {
     };
     return "$qty$unitSuffix";
   }
+
+  Future<List<Map<String, dynamic>>> fetchLeftovers(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('leftovers')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+
+        // Add daysLeftToExpire for sorting/filtering
+        if (data['expiryDate'] != null) {
+          final expiry = DateTime.parse(data['expiryDate']);
+          data['daysLeftToExpire'] = expiry.difference(DateTime.now()).inDays;
+        } else {
+          data['daysLeftToExpire'] = 999; // default large value
+        }
+
+        return data;
+      }).toList();
+    } catch (e) {
+      print('Error fetching leftovers: $e');
+      return [];
+    }
+  }
 }
