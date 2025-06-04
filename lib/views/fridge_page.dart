@@ -210,7 +210,7 @@ class FridgeViewBody extends StatelessWidget {
                       child: Wrap(
                         children: [
                           ListTile(
-                            leading: const Icon(Icons.food_bank),
+                            leading: const Icon(Icons.dinner_dining),
                             title: const Text('Add Leftovers'),
                             onTap: () {
                               Navigator.pop(context);
@@ -221,8 +221,8 @@ class FridgeViewBody extends StatelessWidget {
                             },
                           ),
                           ListTile(
-                            leading: const Icon(Icons.qr_code_scanner),
-                            title: const Text('Scan Barcode'),
+                            leading: const Icon(Icons.shopping_basket),
+                            title: const Text('Add Ingredients'),
                             onTap: () {
                               Navigator.pop(context); // Close the drawer or current modal if needed
                               Navigator.push(
