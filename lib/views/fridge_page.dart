@@ -339,14 +339,31 @@ class FridgeViewBody extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterSheet(BuildContext context, FridgeViewModel vm) {  
+  Widget _buildFilterSheet(BuildContext context, FridgeViewModel vm) {
+    void refreshAndReopen(BuildContext context, void Function() updateFilter) {
+      updateFilter();
+      Navigator.pop(context);
+
+      // Delay to allow UI refresh before reopening modal
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          showModalBottomSheet(
+            context: context,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            builder: (newContext) => _buildFilterSheet(newContext, vm),
+          );
+        }
+      });
+    }
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView(
         shrinkWrap: true,
         children: [
           const Text('Filters', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-
           const SizedBox(height: 16),
           const Text('Expiry'),
           Wrap(
@@ -355,11 +372,12 @@ class FridgeViewBody extends StatelessWidget {
               return ChoiceChip(
                 label: Text(filter == ExpiryFilter.all ? 'All' : 'Expiring Soon'),
                 selected: vm.expiryFilter == filter,
-                onSelected: (_) => vm.setExpiryFilter(filter),
+                onSelected: (_) {
+                  refreshAndReopen(context, () => vm.setExpiryFilter(filter));
+                },
               );
             }).toList(),
           ),
-
           const SizedBox(height: 16),
           const Text('Quantity'),
           Wrap(
@@ -368,11 +386,12 @@ class FridgeViewBody extends StatelessWidget {
               return ChoiceChip(
                 label: Text(filter == QuantityFilter.all ? 'All' : 'Low Stock'),
                 selected: vm.quantityFilter == filter,
-                onSelected: (_) => vm.setQuantityFilter(filter),
+                onSelected: (_) {
+                  refreshAndReopen(context, () => vm.setQuantityFilter(filter));
+                },
               );
             }).toList(),
           ),
-
           const SizedBox(height: 16),
           const Text('Sort By'),
           Wrap(
@@ -394,11 +413,12 @@ class FridgeViewBody extends StatelessWidget {
               return ChoiceChip(
                 label: Text(label),
                 selected: vm.sortOrder == order,
-                onSelected: (_) => vm.setSortOrder(order),
+                onSelected: (_) {
+                  refreshAndReopen(context, () => vm.setSortOrder(order));
+                },
               );
             }).toList(),
           ),
-
           const SizedBox(height: 24),
           Row(
             children: [
@@ -417,15 +437,11 @@ class FridgeViewBody extends StatelessWidget {
                   child: const Text('Apply Filters'),
                 ),
               ),
-
               const SizedBox(width: 12),
-
-              // Clear Filters Button – styled identically
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    vm.clearFilters();
-                    Navigator.pop(context);
+                    refreshAndReopen(context, () => vm.clearFilters());
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
@@ -434,9 +450,7 @@ class FridgeViewBody extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: BorderSide.none, // Remove any border
                     ),
-                    shadowColor: Colors.black26,
                   ),
                   child: const Text('Clear Filters'),
                 ),
