@@ -254,12 +254,16 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
                             ListTile(
                               leading: const Icon(Icons.dinner_dining),
                               title: const Text('Add Leftovers'),
-                              onTap: () {
+                              onTap: () async{
+                                final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const AddLeftoverView()),
+                              );
+
+                              if (result == true) {
+                                vm.loadIngredients();
+                              }
                                 Navigator.pop(context);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => AddLeftoverView()),
-                                );
                               },
                             ),
                             ListTile(
