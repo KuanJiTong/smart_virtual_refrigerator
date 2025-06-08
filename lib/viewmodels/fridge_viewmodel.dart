@@ -51,7 +51,7 @@ class FridgeViewModel extends ChangeNotifier {
       final matchesCategory = selectedCategory == 'All' || item['category'] == selectedCategory;
       final matchesSearch = item['name'].toString().toLowerCase().contains(searchKeyword.toLowerCase());
       final matchesExpiry = expiryFilter == ExpiryFilter.all ||
-          (expiryFilter == ExpiryFilter.expiringSoon && item['daysLeftToExpire'] <= 3);
+          (expiryFilter == ExpiryFilter.expiringSoon && item['daysLeftToExpire'] <= 5);
       final matchesQuantity = quantityFilter == QuantityFilter.all ||
           (quantityFilter == QuantityFilter.lowStock && _isLowStock(item['quantity']));
 
