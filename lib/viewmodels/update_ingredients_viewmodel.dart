@@ -11,6 +11,8 @@ class UpdateIngredientsViewModel extends ChangeNotifier {
   String _name = '';
   String _category = '';
   String _quantity = '0';
+  String _quantityUnit = '';
+  String _storageLocation = '';
   bool _hasExpiry = true;
   DateTime? _expirationDate;
   String _imageUrl = '';
@@ -30,6 +32,16 @@ class UpdateIngredientsViewModel extends ChangeNotifier {
 
   void updateQuantity(String quantity) {
     _quantity = quantity;
+    notifyListeners();
+  }
+
+  void updateStorageLocation(String quantity) {
+    _storageLocation = quantity;
+    notifyListeners();
+  }
+
+  void updateQuantityUnit(String quantity) {
+    _quantityUnit = quantity;
     notifyListeners();
   }
 
@@ -67,6 +79,8 @@ class UpdateIngredientsViewModel extends ChangeNotifier {
       name: _name,
       category: _category,
       quantity: _quantity,
+      quantityUnit: _quantityUnit,
+      storageLocation: _storageLocation,
       hasExpiry: _hasExpiry,
       expirationDate: _expirationDate,
       imageUrl: _imageUrl,

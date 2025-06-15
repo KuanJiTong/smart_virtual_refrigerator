@@ -75,9 +75,9 @@ class _UpdateIngredientsViewState extends State<UpdateIngredientsView> {
     }
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    final pickedImage = await picker.pickImage(source: source);
     if (pickedImage != null) {
       setState(() {
         _pickedImage = File(pickedImage.path);
@@ -106,16 +106,21 @@ class _UpdateIngredientsViewState extends State<UpdateIngredientsView> {
             children: [
               Center(
                 child: _pickedImage != null
-                    ? Image.file(_pickedImage!, height: 180)
-                    : widget.ingredient['image'] != null
-                    ? Image.network(widget.ingredient['image'], height: 180)
-                    : Image.network('https://imageplaceholder.net/150x150', height: 180),
+                    ? Image.file(_pickedImage!, height: 150)
+                    : widget.ingredient['image'] != ''
+                    ? Image.network(widget.ingredient['image'], height: 150)
+                    : Container(
+                      height: 150,
+                      width: 150,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.add_a_photo, size: 50),
+                    ),
               ),
               Center(
                 child: Column(
                   children: [
                     ElevatedButton.icon(
-                      onPressed: _pickImage,
+                      onPressed: _showImageSourceDialog,
                       icon: const Icon(Icons.upload),
                       label: const Text("Upload Image"),
                     ),
@@ -256,12 +261,7 @@ class _UpdateIngredientsViewState extends State<UpdateIngredientsView> {
                     setState(() => _isLoading = false);
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.yellow[700],
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                ),
-                child: const Text("Update Ingredient", style: TextStyle(fontSize: 16, color: Colors.black)),
+                child: const Text("Update Ingredient"),
               ),
               SizedBox(height: 5),
               ElevatedButton(
@@ -278,7 +278,7 @@ class _UpdateIngredientsViewState extends State<UpdateIngredientsView> {
                         ),
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(true),
-                          child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                          child: const Text('Delete', style: TextStyle(color: const Color(0xFFE85C5C))),
                         ),
                       ],
                     ),
@@ -305,14 +305,11 @@ class _UpdateIngredientsViewState extends State<UpdateIngredientsView> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  backgroundColor: const Color(0xFFE85C5C),
                 ),
                 child: const Text(
                   "Delete Ingredient",
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
+                  ),
               ),
 
             ],
@@ -328,4 +325,32 @@ class _UpdateIngredientsViewState extends State<UpdateIngredientsView> {
       ]),
     );
   }
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text("Take Photo"),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text("Choose from Gallery"),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 }

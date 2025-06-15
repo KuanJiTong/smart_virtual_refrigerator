@@ -3,15 +3,41 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/profile_viewmodel.dart';
 
+import '../viewmodels/login_viewmodel.dart';
+import 'login_view.dart';
+
 class ManageProfilePage extends StatelessWidget {
   const ManageProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final signout = Provider.of<LoginViewModel>(context, listen: false);
     return ChangeNotifierProvider(
       create: (_) => ProfileViewModel()..loadUserData(),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Manage Profile')),
+        appBar: AppBar(
+          title: const Text('Manage Profile'),
+          actions: [
+            Container(
+              margin: EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: Colors.white, // Background color
+                borderRadius: BorderRadius.circular(12), // Adjust radius as needed
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.logout),
+                onPressed: () async {
+                  await signout.signOut();
+
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => const LoginView()),
+                  );
+                },
+                tooltip: 'Logout',
+              )
+            )
+          ],
+        ),
         body: Consumer<ProfileViewModel>(
           builder: (context, viewModel, _) {
             final user = viewModel.user;
@@ -85,13 +111,15 @@ class ManageProfilePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  ElevatedButton(
-                    onPressed: () async {
-                      await viewModel.updateName();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Name updated')));
-                    },
-                    child: const Text('Save Name'),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await viewModel.updateName();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Name updated')));
+                      },
+                      child: const Text('Save Name'),
+                    ),
                   ),
 
                   const Divider(height: 40),
@@ -125,24 +153,71 @@ class ManageProfilePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  ElevatedButton(
-                    onPressed: () async {
-                      final result = await viewModel.changePassword();
-                      final snackBar = SnackBar(
-                        content:
-                            Text(result ?? 'Password updated successfully'),
-                        backgroundColor:
-                            result == null ? Colors.green : Colors.red,
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                    },
-                    child: const Text('Change Password'),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final result = await viewModel.changePassword();
+                        final snackBar = SnackBar(
+                          content:
+                              Text(result ?? 'Password updated successfully'),
+                          backgroundColor:
+                              result == null ? Colors.green : Colors.red,
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      },
+                      child: const Text('Change Password'),
+                    ),
                   ),
                 ],
               ),
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    final profileVM = Provider.of<ProfileViewModel>(context);
+    profileVM.loadUserData();
+    final userName = profileVM.user?.name ?? 'Guest';
+    final imageUrl = profileVM.user?.imageUrl;
+
+    return Container(
+      height: 100,
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ManageProfilePage()),
+              );
+            },
+            child: CircleAvatar(
+              radius: 24,
+              backgroundImage: NetworkImage(
+                imageUrl ?? 'https://p3-pc-sign.douyinpic.com/tos-cn-i-0813/oEI5tAfqNcIAkc9BAxgeENFEYGA6AnxjDAAXCh~tplv-dy-aweme-images:q75.webp?biz_tag=aweme_images&from=327834062&lk3s=138a59ce&s=PackSourceEnum_SEARCH&sc=image&se=false&x-expires=1750053600&x-signature=lH4UpxReCL0OQMJMLP9eRWASGMI%3D',
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Hello, $userName 👋',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text('Welcome back, $userName' , style: TextStyle(color: Colors.grey)),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.notifications_none),
+            onPressed: () {},
+          )
+        ],
       ),
     );
   }

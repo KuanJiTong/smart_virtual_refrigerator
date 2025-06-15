@@ -27,26 +27,25 @@ class FirestoreService {
     required String name,
     required String category,
     required String quantity,
+    required String quantityUnit,
+    required String storageLocation,
     required bool hasExpiry,
     DateTime? expirationDate,
     required String imageUrl,
   }) async {
-    final String quantityWithUnit = _formatQuantity(quantity, _getUnit(category));
     final String formattedDate = hasExpiry && expirationDate != null
         ? DateFormat('yyyy-MM-dd').format(expirationDate)
         : '';
-    final int daysLeft = hasExpiry && expirationDate != null
-        ? expirationDate.difference(DateTime.now()).inDays
-        : 0;
 
     final Map<String, dynamic> ingredientData = {
       'userId': userId,
       'category': category,
       'image': imageUrl,
-      'quantity': quantityWithUnit,
+      'quantity': quantity,
+      'quantityUnit': quantityUnit,
+      'storageLocation': storageLocation,
       'name': name,
       'expiredDate': formattedDate,
-      'daysLeftToExpire': daysLeft,
     };
 
     await _firestore.collection('ingredients').add(ingredientData);
@@ -66,58 +65,29 @@ class FirestoreService {
     required String name,
     required String category,
     required String quantity,
+    required String quantityUnit,
+    required String storageLocation,
     required bool hasExpiry,
     DateTime? expirationDate,
     required String imageUrl,
   }) async {
-    final String quantityWithUnit = _formatQuantity(quantity, _getUnit(category));
     final String formattedDate = hasExpiry && expirationDate != null
         ? DateFormat('yyyy-MM-dd').format(expirationDate)
         : '';
-    final int daysLeft = hasExpiry && expirationDate != null
-        ? expirationDate.difference(DateTime.now()).inDays
-        : 0;
 
     final docRef = FirebaseFirestore.instance.collection('ingredients').doc(docId);
 
     final Map<String, dynamic> updatedData = {
       'category': category,
       'image': imageUrl,
-      'quantity': quantityWithUnit,
+      'quantity': quantity,
+      'quantityUnit': quantityUnit,
+      'storageLocation': storageLocation,
       'name': name,
       'expiredDate': formattedDate,
-      'daysLeftToExpire': daysLeft,
     };
     await docRef.update(updatedData);
   }
-
-  String _getUnit(String category) {
-    final Map<String, String> unitMapping = {
-      'Bread': 'Slice',
-      'Meat': 'Gram',
-      'Vegetable': 'Gram',
-      'Fruit': 'Piece',
-      'Dairy': 'Milliliter',
-      'Beverage': 'Milliliter',
-      'Spice': 'Tablespoon',
-      'Grain': 'Gram',
-      'Condiment': 'Tablespoon',
-    };
-    return unitMapping[category] ?? 'Unit';
-  }
-
-  String _formatQuantity(String qty, String unit) {
-    final unitSuffix = switch (unit.toLowerCase()) {
-      'gram' => 'g',
-      'milliliter' => 'ml',
-      'piece' => 'pcs',
-      'slice' => 'pcs',
-      'tablespoon' => 'tbsp',
-      _ => unit
-    };
-    return "$qty$unitSuffix";
-  }
-
   Future<List<Map<String, dynamic>>> fetchLeftovers(String userId) async {
     try {
       final snapshot = await _firestore

@@ -154,17 +154,26 @@ class _AddLeftoverViewState extends State<AddLeftoverView> {
           key: _formKey,
           child: ListView(
             children: [
-              GestureDetector(
-                onTap: _showImageSourceDialog,
-                child: _imageFile == null
+              _imageFile == null
                     ? Container(
                         height: 150,
                         color: Colors.grey[300],
                         child: const Icon(Icons.add_a_photo, size: 50),
                       )
                     : Image.file(_imageFile!, height: 150),
+              SizedBox(height: 8),
+              Center(
+                child: Column(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _showImageSourceDialog,
+                      icon: const Icon(Icons.upload),
+                      label: const Text("Upload Image"),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
               //Name
               _styledTextField(
