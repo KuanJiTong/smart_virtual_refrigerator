@@ -44,26 +44,47 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final signout = Provider.of<LoginViewModel>(context, listen: false);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFBFCFE),
       body: SafeArea(
         child: _pages[_selectedIndex],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.receipt), label: ''), // FridgePage
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
-        ],
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            backgroundColor: Colors.white,
+            selectedItemColor: Colors.black,
+            unselectedItemColor: Colors.grey,
+            selectedIconTheme: const IconThemeData(size: 28),
+            unselectedIconTheme: const IconThemeData(size: 24),
+            showUnselectedLabels: true,
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+              BottomNavigationBarItem(icon: Icon(Icons.receipt), label: ''),
+              BottomNavigationBarItem(icon: Icon(Icons.kitchen), label: ''),
+              BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: ''),
+              BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
+            ],
+          ),
+        ),
       ),
     );
+
   }
 }
 
@@ -79,23 +100,6 @@ class _HomeBody extends StatelessWidget {
     ingredientVM.fetchIngredients(signout.user?.uid ?? "");
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text("Home Page"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.black),
-            onPressed: () async {
-              await signout.signOut();
-
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const LoginView()),
-              );
-            },
-            tooltip: 'Sign Out',
-          ),
-        ],
-      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -132,11 +136,6 @@ class _HomeBody extends StatelessWidget {
                             selected: isSelected,
                             onSelected: (_) =>
                                 recipeVM.updateCategory(category),
-                            selectedColor: Colors.black,
-                            backgroundColor: Colors.grey[300],
-                            labelStyle: TextStyle(
-                              color: isSelected ? Colors.white : Colors.black,
-                            ),
                           ),
                         );
                       }).toList(),
@@ -222,38 +221,48 @@ class _HomeBody extends StatelessWidget {
     final userName = profileVM.user?.name ?? 'Guest';
     final imageUrl = profileVM.user?.imageUrl;
 
-    return Row(
-      children: [
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ManageProfilePage()),
-            );
-          },
-          child: CircleAvatar(
-            radius: 24,
-            backgroundImage: NetworkImage(
-              imageUrl ?? 'https://p3-pc-sign.douyinpic.com/tos-cn-i-0813/oEI5tAfqNcIAkc9BAxgeENFEYGA6AnxjDAAXCh~tplv-dy-aweme-images:q75.webp?biz_tag=aweme_images&from=327834062&lk3s=138a59ce&s=PackSourceEnum_SEARCH&sc=image&se=false&x-expires=1750053600&x-signature=lH4UpxReCL0OQMJMLP9eRWASGMI%3D',
+    return Container(
+      height: 100,
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ManageProfilePage()),
+              );
+            },
+            child: CircleAvatar(
+              radius: 24,
+              backgroundImage: NetworkImage(
+                imageUrl ?? 'https://p3-pc-sign.douyinpic.com/tos-cn-i-0813/oEI5tAfqNcIAkc9BAxgeENFEYGA6AnxjDAAXCh~tplv-dy-aweme-images:q75.webp?biz_tag=aweme_images&from=327834062&lk3s=138a59ce&s=PackSourceEnum_SEARCH&sc=image&se=false&x-expires=1750053600&x-signature=lH4UpxReCL0OQMJMLP9eRWASGMI%3D',
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Hello, $userName 👋',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              Text('Welcome back, $userName' , style: TextStyle(color: Colors.grey)),
-            ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Hello, $userName 👋',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text('Welcome back, $userName' , style: TextStyle(color: Colors.grey)),
+              ],
+            ),
           ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.notifications_none),
-          onPressed: () {},
-        )
-      ],
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white, // Background color
+              borderRadius: BorderRadius.circular(12), // Adjust radius as needed
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.notifications_none),
+              onPressed: () {},
+            ),
+          )
+        ],
+      ),
     );
   }
 }

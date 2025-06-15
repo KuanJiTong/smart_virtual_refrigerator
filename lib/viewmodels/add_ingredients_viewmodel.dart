@@ -10,6 +10,8 @@ class AddIngredientViewModel extends ChangeNotifier {
   String name = '';
   String category = 'Bread';
   String quantity = '';
+  String quantityUnit = '';
+  String storageLocation = '';
   DateTime? expirationDate;
   bool hasExpiry = true;
   String imageUrl = '';
@@ -31,6 +33,11 @@ class AddIngredientViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateStorageLocation(String value) {
+    storageLocation = value;
+    notifyListeners();
+  }
+
   void updateCategory(String value) {
     category = value;
     notifyListeners();
@@ -38,6 +45,11 @@ class AddIngredientViewModel extends ChangeNotifier {
 
   void updateQuantity(String value) {
     quantity = value;
+    notifyListeners();
+  }
+
+  void updateQuantityUnit(String value) {
+    quantityUnit = value;
     notifyListeners();
   }
 
@@ -68,6 +80,8 @@ class AddIngredientViewModel extends ChangeNotifier {
       name: name,
       category: category,
       quantity: quantity,
+      quantityUnit: quantityUnit,
+      storageLocation: storageLocation,
       hasExpiry: hasExpiry,
       expirationDate: expirationDate,
       imageUrl: imageUrl,

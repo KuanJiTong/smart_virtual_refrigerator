@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/leftover_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/views/update_ingredients_view.dart';
@@ -9,6 +10,7 @@ import '../viewmodels/fridge_viewmodel.dart';
 import 'add_ingredients_barcode_view.dart';
 import 'leftovers_page.dart';
 import '../services/auth_service.dart';
+import 'dart:math';
 
 class FridgePage extends StatefulWidget {
   const FridgePage({super.key});
@@ -18,17 +20,21 @@ class FridgePage extends StatefulWidget {
 }
 
 class _FridgePageState extends State<FridgePage> {
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      Provider.of<FridgeViewModel>(context, listen: false).loadIngredients();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => FridgeViewModel(),
       child: Consumer<FridgeViewModel>(
         builder: (context, vm, _) {
-          final userId = AuthService().userId;
-          if (userId != null && vm.allIngredients.isEmpty && !vm.isLoading) {
-            vm.loadIngredients();
-          }
-
           return FridgeViewBody();
         },
       ),
@@ -63,16 +69,22 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
                     ];
                     
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text('Fridge'),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {},
-          ),
+          Container(
+              margin: EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: Colors.white, // Background color
+                borderRadius: BorderRadius.circular(12), // Adjust radius as needed
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.notifications_none),
+                onPressed: () {},
+              ),
+          )
         ],
       ),
       body: vm.isLoading
@@ -138,6 +150,9 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
                                     vm.loadIngredients();
                                   }
                                 },
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.black,
+                                ),
                                 child: const Text('View All'),
                               ),
                           ],
@@ -147,7 +162,14 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
                     const SizedBox(height: 12),
                     SizedBox(
                       height: 150,
-                      child: ListView(
+                      child: vm.allLeftovers.isEmpty
+                          ? Center(
+                        child: Text(
+                          'No leftovers available',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      )
+                          : ListView(
                         scrollDirection: Axis.horizontal,
                         children: vm.allLeftovers.map((leftover) {
                           return _leftoverCard(
@@ -166,11 +188,10 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
                               if (result == true) {
                                 vm.loadIngredients();
                               }
-                            }
+                            },
                           );
                         }).toList(),
-                        
-                      ),
+                      )
                     ),
 
                     const SizedBox(height: 24),
@@ -184,23 +205,34 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    
-                    // Category Filter Chips
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: categories.map((category) {
-                        return ChoiceChip(
-                          label: Text(category),
-                          selected: vm.selectedCategory == category,
-                          onSelected: (_) => vm.setCategory(category),
-                        );
-                      }).toList(),
+
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: BouncingScrollPhysics(),
+                      child: Row(
+                        children: categories.map((category) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: ChoiceChip(
+                              label: Text(category),
+                              selected: vm.selectedCategory == category,
+                              onSelected: (_) => vm.setCategory(category),
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
 
                     const SizedBox(height: 16),
 
-                    Wrap(
+                    vm.filteredIngredients.isEmpty
+                        ? Center(
+                      child: Text(
+                        'No ingredients available',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    )
+                        : Wrap(
                       spacing: 12,
                       runSpacing: 12,
                       children: vm.filteredIngredients.map((ingredient) {
@@ -215,14 +247,23 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
                                 id: ingredient['id'],
                                 image: '${ingredient['image']}',
                                 quantity: ingredient['quantity'],
+                                quantityUnit: ingredient['quantityUnit'],
+                                storageLocation: ingredient['storageLocation'],
                                 name: ingredient['name'],
                                 expiredDate: ingredient['expiredDate'],
-                                daysLeftToExpire: ingredient['daysLeftToExpire'],
+                                daysLeftToExpire: max(
+                                  0,
+                                  DateTime.parse(ingredient['expiredDate'])
+                                      .difference(DateTime.now())
+                                      .inDays,
+                                ),
                                 onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => UpdateIngredientsView(ingredient: ingredient),
+                                      builder: (_) => UpdateIngredientsView(
+                                        ingredient: ingredient,
+                                      ),
                                     ),
                                   );
                                 },
@@ -231,62 +272,62 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
                           },
                         );
                       }).toList(),
-                    ),
-
+                    )
                   ],
                 ),
               ),
             ),
-
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                  ),
-                  builder: (context) {
-                    return SafeArea( // <-- Added SafeArea here
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Wrap(
-                          children: [
-                            ListTile(
-                              leading: const Icon(Icons.dinner_dining),
-                              title: const Text('Add Leftovers'),
-                              onTap: () async{
-                                final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const AddLeftoverView()),
-                              );
-
-                              if (result == true) {
-                                vm.loadIngredients();
-                              }
-                                Navigator.pop(context);
-                              },
-                            ),
-                            ListTile(
-                              leading: const Icon(Icons.shopping_basket),
-                              title: const Text('Add Ingredients'),
-                              onTap: () {
-                                Navigator.pop(context); // Close the drawer or current modal if needed
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => AddIngredientsBarcodeView()),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-              backgroundColor: Colors.black,
-              child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: SpeedDial(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        icon: Icons.add,
+        activeIcon: Icons.close,
+        spacing: 12,
+        spaceBetweenChildren: 8,
+        children: [
+          SpeedDialChild(
+            label: 'Add Leftovers',
+            backgroundColor: Colors.transparent,
+            labelStyle: const TextStyle(fontSize: 14),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              padding: const EdgeInsets.all(12),
+              child: const Icon(Icons.dinner_dining, color: Colors.black),
             ),
+            onTap: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AddLeftoverView()),
+              );
+              if (result == true) {
+                vm.loadIngredients();
+              }
+            },
+          ),
+          SpeedDialChild(
+            label: 'Add Ingredients',
+            backgroundColor: Colors.transparent,
+            labelStyle: const TextStyle(fontSize: 14),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              padding: const EdgeInsets.all(12),
+              child: const Icon(Icons.shopping_basket, color: Colors.black),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => AddIngredientsBarcodeView()),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -298,18 +339,29 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
   required VoidCallback onTap,
 }) {
   Widget imageWidget;
-
+  final isExpired = DateTime.parse(expiryDate).difference(DateTime.now()).inDays <= 0;
   if (imageUrl != null && imageUrl.isNotEmpty) {
     imageWidget = Image.network(
       imageUrl,
       width: double.infinity,
       height: 100,
       fit: BoxFit.cover,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          width: double.infinity,
+          height: 100,
+          color: Colors.grey[200],
+          alignment: Alignment.center,
+          child: const CircularProgressIndicator(),
+        );
+      },
       errorBuilder: (context, error, stackTrace) {
         return Container(
           width: double.infinity,
           height: 100,
           color: Colors.grey[300],
+          alignment: Alignment.center,
           child: const Icon(Icons.broken_image, size: 40),
         );
       },
@@ -331,34 +383,60 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: imageWidget,
+            ),
+            const SizedBox(height: 8),
+            Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: imageWidget,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            color: isExpired ? const Color(0xFFE85C5C) : Colors.grey,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4), // Small space between icon and text
+
+                          Text(
+                            expiryDate,
+                            style: TextStyle(
+                              color: isExpired ? const Color(0xFFE85C5C) : Colors.grey,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(quantity.toString()),
+                const SizedBox(width: 4),
+                Container(
+                  width: 32,
+                  height: 32,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF9DA5C1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    quantity.toString(),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              name,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              overflow: TextOverflow.ellipsis, // <-- Truncate with "..."
-              maxLines: 1, // <-- Ensure it doesn't exceed 1 line
-            ),
-            Text(expiryDate, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            )
           ],
         ),
       ),
@@ -369,6 +447,8 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
     required String id,
     required String image,
     required String quantity,
+    required String quantityUnit,
+    required String storageLocation,
     required String name,
     required String expiredDate,
     required int daysLeftToExpire,
@@ -377,10 +457,10 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
     return InkWell(
       onTap: onTap,
       child: Container(
-        height: 150,
+        height: 325,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: const Color(0xFFF6F8FC),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -388,21 +468,88 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Image.network(
-                image,
-                height: 35,
-                width: 35,
-                fit: BoxFit.contain,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF9DA5C1),
+                  borderRadius: BorderRadius.circular(32),
+                ),
+                child: Text(
+                  '$quantity $quantityUnit(s)',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: (image != '')
+                    ? Image.network(
+                  image,
+                  height: 100,
+                  width: 100,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      height: 100,
+                      width: 100,
+                      alignment: Alignment.center,
+                      color: Colors.grey[200],
+                      child: const CircularProgressIndicator(),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 100,
+                      height: 100,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.broken_image, size: 40),
+                    );
+                  },
+                )
+                    : Container(
+                  width: 100,
+                  height: 100,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.image_not_supported, size: 40),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: (daysLeftToExpire / 31).clamp(0.0, 1.0),
+                backgroundColor: Colors.grey.shade300,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  daysLeftToExpire <= 0
+                      ? const Color(0xFFE85C5C)
+                      : daysLeftToExpire <= 3
+                      ? const Color(0xFFE85C5C)
+                      : daysLeftToExpire <= 5
+                      ? Colors.orange
+                      : const Color(0xFF22C97D),
+                ),
+                minHeight: 8,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: Text(
+                daysLeftToExpire == 0 ? 'Expired' : '$daysLeftToExpire day(s) left',
+                style: TextStyle(
+                  color: daysLeftToExpire == 0 ? Colors.red : Colors.black,
+                  fontWeight: daysLeftToExpire == 0 ? FontWeight.bold : FontWeight.normal,
+                ),
               ),
             ),
             const SizedBox(height: 8),
-            Text(name, style: const TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1),
-            Text('Qty: $quantity'),
-            Text('Expires: $expiredDate'),
-            Text(
-              'Days left: $daysLeftToExpire',
-              style: TextStyle(color: daysLeftToExpire <= 1 ? Colors.red : Colors.black),
-            ),
+            Center(child: Text(name, style: const TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis, maxLines: 1)),
+            Center(child: Text('($storageLocation)', style: const TextStyle(fontWeight: FontWeight.bold))),
+            Center(child: Text('$expiredDate')),
+
           ],
         ),
       ),

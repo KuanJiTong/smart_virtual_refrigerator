@@ -126,7 +126,7 @@ class _UpdateLeftoverViewState extends State<UpdateLeftoverView> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: const Color(0xFFE85C5C))),
           ),
         ],
       ),
@@ -158,9 +158,7 @@ class _UpdateLeftoverViewState extends State<UpdateLeftoverView> {
             key: _formKey,
             child: ListView(
               children: [
-                GestureDetector(
-                  onTap: () => _pickImage(ImageSource.gallery),
-                  child: _imageFile != null
+                _imageFile != null
                       ? Image.file(_imageFile!, height: 150)
                       : (_imageUrl != null
                           ? Image.network(_imageUrl!, height: 150)
@@ -169,8 +167,19 @@ class _UpdateLeftoverViewState extends State<UpdateLeftoverView> {
                               color: Colors.grey[300],
                               child: const Icon(Icons.add_a_photo, size: 50),
                             )),
+                SizedBox(height: 8),
+                Center(
+                  child: Column(
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: _showImageSourceDialog,
+                        icon: const Icon(Icons.upload),
+                        label: const Text("Upload Image"),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
         
                 _textField(_nameController, "Name"),
                 const SizedBox(height: 12),
@@ -208,24 +217,16 @@ class _UpdateLeftoverViewState extends State<UpdateLeftoverView> {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.yellow[700],
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                  ),
-                  child: const Text("Update Leftover", style: TextStyle(fontSize: 16, color: Colors.black)),
+                  child: const Text("Update Leftover"),
                 ),        
                 SizedBox(height: 5),
                 ElevatedButton(
                   onPressed: _deleteLeftover,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    backgroundColor: const Color(0xFFE85C5C),
                   ),
                   child: const Text(
                     "Delete Leftover",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
               ],
@@ -240,6 +241,34 @@ class _UpdateLeftoverViewState extends State<UpdateLeftoverView> {
             ),
           ),
         ]
+      ),
+    );
+  }
+
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text("Take Photo"),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text("Choose from Gallery"),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

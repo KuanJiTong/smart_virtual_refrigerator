@@ -21,8 +21,8 @@ class AddIngredientsView extends StatefulWidget {
 
 class _AddIngredientsViewState extends State<AddIngredientsView> {
   bool _isLoading = false;
-  final TextEditingController nameController = TextEditingController(text: 'Ingredient Name');
-  final TextEditingController quantityController = TextEditingController(text: '10');
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController quantityController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
 
   bool hasExpiry = true;
@@ -33,18 +33,20 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
     'Bread', 'Meat', 'Vegetable', 'Fruit', 'Dairy', 'Beverage', 'Spice', 'Grain', 'Condiment',
   ];
 
-  String selectedCategory = 'Bread';
+  final List<String> quantityUnits = [
+    'Gram', 'Milliliter', 'Slice', 'Piece', 'Tablespoon', 'Cup', 'Unit'
+  ];
 
-  final Map<String, String> unitMapping = {
-    'Bread': 'Slice', 'Meat': 'Gram', 'Vegetable': 'Gram', 'Fruit': 'Piece',
-    'Dairy': 'Milliliter', 'Beverage': 'Milliliter', 'Spice': 'Tablespoon',
-    'Grain': 'Gram', 'Condiment': 'Tablespoon',
-  };
+  final List<String> storageLocations = ['Fridge', 'Freezer', 'Pantry'];
+
+  String selectedCategory = 'Bread';
+  String selectedUnit = 'Gram';
+  String selectedStorage = 'Fridge';
 
   @override
   void initState() {
     super.initState();
-    nameController.text = widget.initialName ?? 'Massimo Sandwich Loaf';
+    nameController.text = widget.initialName ?? '';
     dateController.text = DateFormat('dd MMM yyyy').format(selectedDate);
     selectedCategory = categories.contains('Bread') ? 'Bread' : categories.first;
   }
@@ -65,9 +67,9 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
     }
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    final pickedImage = await picker.pickImage(source: source);
     if (pickedImage != null) {
       setState(() {
         _pickedImage = File(pickedImage.path);
@@ -77,7 +79,6 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
 
   @override
   Widget build(BuildContext context) {
-    String quantityUnit = unitMapping[selectedCategory] ?? 'Unit';
     final ingredientVM = Provider.of<AddIngredientViewModel>(context);
 
     return Scaffold(
@@ -90,172 +91,192 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
         elevation: 0,
       ),
       body: Stack(
-        children: [Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ListView(
-            children: [
-              Center(
-                child: _pickedImage != null
-                    ? Image.file(_pickedImage!, height: 180)
-                    : widget.imageUrl != null
-                    ? Image.network(widget.imageUrl!, height: 180)
-                    : Image.network('https://imageplaceholder.net/150x150', height: 180),
-              ),
-              Center(
-                child: Column(
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: _pickImage,
-                      icon: const Icon(Icons.upload),
-                      label: const Text("Upload Image"),
-                    ),
-                  ],
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
+              children: [
+                Center(
+                  child: _pickedImage != null
+                      ? Image.file(_pickedImage!, height: 150)
+                      : widget.imageUrl != null
+                      ? Image.network(widget.imageUrl!, height: 150)
+                      : Container(
+                          height: 150,
+                          width: 150,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.add_a_photo, size: 50),
+                        ),
                 ),
-              ),
-              SizedBox(height: 16),
-              // Name
-              TextFormField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: "Name",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              SizedBox(height: 16),
-
-              // Expire Switch
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Expire", style: TextStyle(fontSize: 16)),
-                  Switch(
-                    value: hasExpiry,
-                    onChanged: (val) {
-                      setState(() => hasExpiry = val);
-                    },
-                  )
-                ],
-              ),
-              SizedBox(height: 8),
-
-              // Expiration Date
-              if (hasExpiry)
-                TextFormField(
-                  controller: dateController,
-                  readOnly: true,
-                  onTap: () => _selectDate(context),
-                  decoration: InputDecoration(
-                    labelText: "Expiration Date",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-              SizedBox(height: 16),
-
-              // Quantity
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: quantityController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: "Quantity ($quantityUnit)",
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Column(
+                SizedBox(height: 8),
+                Center(
+                  child: Column(
                     children: [
-                      IconButton(
-                        icon: Icon(Icons.add),
-                        onPressed: () {
-                          int current = int.tryParse(quantityController.text) ?? 0;
-                          quantityController.text = (current + 1).toString();
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.remove),
-                        onPressed: () {
-                          int current = int.tryParse(quantityController.text) ?? 0;
-                          if (current > 0) quantityController.text = (current - 1).toString();
-                        },
+                      ElevatedButton.icon(
+                        onPressed: _showImageSourceDialog,
+                        icon: const Icon(Icons.upload),
+                        label: const Text("Upload Image"),
                       ),
                     ],
                   ),
-                ],
-              ),
-              SizedBox(height: 16),
-
-              // Category
-              DropdownButtonFormField<String>(
-                value: selectedCategory,
-                decoration: InputDecoration(
-                  labelText: "Category",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                items: categories.map((String category) {
-                  return DropdownMenuItem<String>(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedCategory = value!;
-                  });
-                },
-              ),
-              SizedBox(height: 32),
+                SizedBox(height: 8),
 
-              // Add Button
-              ElevatedButton(
-                onPressed: () async {
-                  setState(() => _isLoading = true);
-
-                  try {
-                    ingredientVM.updateName(nameController.text);
-                    ingredientVM.updateCategory(selectedCategory);
-                    ingredientVM.updateQuantity(quantityController.text);
-                    ingredientVM.toggleExpiry(hasExpiry);
-                    if (hasExpiry) {
-                      ingredientVM.updateExpirationDate(selectedDate);
-                    }
-
-                    // If image is picked locally, you'd want to upload it first and get the URL
-                    if (_pickedImage != null) {
-                      // You need to implement your own image upload logic and get the imageUrl
-                      String uploadedImageUrl = await ingredientVM.uploadPickedImageToFirebase(_pickedImage!);
-                      ingredientVM.setImage(uploadedImageUrl);
-                    } else {
-                      ingredientVM.setImage(widget.imageUrl ?? 'https://imageplaceholder.net/150x150');
-                    }
-
-                    await ingredientVM.addIngredientToFirebase();
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Ingredient added to fridge')),
-                    );
-
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const HomePage(initialIndex: 2)));
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to add ingredient: $e')),
-                    );
-                  } finally {
-                    setState(() => _isLoading = false);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.yellow[700],
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                // Name
+                TextFormField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: "Name",
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                 ),
-                child: Text("Add to Fridge", style: TextStyle(fontSize: 16, color: Colors.black)),
-              ),
-            ],
+                SizedBox(height: 16),
+
+                // Expire Switch
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Expire", style: TextStyle(fontSize: 16)),
+                    Switch(
+                      value: hasExpiry,
+                      onChanged: (val) {
+                        setState(() => hasExpiry = val);
+                      },
+                    )
+                  ],
+                ),
+                SizedBox(height: 8),
+
+                // Expiration Date
+                if (hasExpiry)
+                  TextFormField(
+                    controller: dateController,
+                    readOnly: true,
+                    onTap: () => _selectDate(context),
+                    decoration: InputDecoration(
+                      labelText: "Expiration Date",
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                SizedBox(height: 16),
+
+                // Quantity with Unit Dropdown
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: quantityController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: "Quantity",
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    DropdownButton<String>(
+                      value: selectedUnit,
+                      items: quantityUnits.map((String unit) {
+                        return DropdownMenuItem<String>(
+                          value: unit,
+                          child: Text(unit),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedUnit = value!;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+
+                // Category
+                DropdownButtonFormField<String>(
+                  value: selectedCategory,
+                  decoration: InputDecoration(
+                    labelText: "Category",
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  items: categories.map((String category) {
+                    return DropdownMenuItem<String>(
+                      value: category,
+                      child: Text(category),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedCategory = value!;
+                    });
+                  },
+                ),
+                SizedBox(height: 16),
+
+                // Storage Location
+                DropdownButtonFormField<String>(
+                  value: selectedStorage,
+                  decoration: InputDecoration(
+                    labelText: "Storage Location",
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  items: storageLocations.map((String location) {
+                    return DropdownMenuItem<String>(
+                      value: location,
+                      child: Text(location),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedStorage = value!;
+                    });
+                  },
+                ),
+                SizedBox(height: 32),
+
+                // Add Button
+                ElevatedButton(
+                  onPressed: () async {
+                    setState(() => _isLoading = true);
+
+                    try {
+                      ingredientVM.updateName(nameController.text);
+                      ingredientVM.updateCategory(selectedCategory);
+                      ingredientVM.updateQuantity(quantityController.text);
+                      ingredientVM.updateQuantityUnit(selectedUnit);
+                      ingredientVM.toggleExpiry(hasExpiry);
+                      ingredientVM.updateStorageLocation(selectedStorage);
+                      if (hasExpiry) {
+                        ingredientVM.updateExpirationDate(selectedDate);
+                      }
+
+                      if (_pickedImage != null) {
+                        String uploadedImageUrl = await ingredientVM.uploadPickedImageToFirebase(_pickedImage!);
+                        ingredientVM.setImage(uploadedImageUrl);
+                      } else {
+                        ingredientVM.setImage(widget.imageUrl ?? '');
+                      }
+
+                      await ingredientVM.addIngredientToFirebase();
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Ingredient added to fridge')),
+                      );
+
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const HomePage(initialIndex: 2)));
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to add ingredient: $e')),
+                      );
+                    } finally {
+                      setState(() => _isLoading = false);
+                    }
+                  },
+                  child: Text("Add to Fridge"),
+                ),
+              ],
+            ),
           ),
-        ),
           if (_isLoading)
             Container(
               color: Colors.black.withOpacity(0.5),
@@ -263,7 +284,36 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
                 child: CircularProgressIndicator(),
               ),
             ),
-      ]),
+        ],
+      ),
+    );
+  }
+
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text("Take Photo"),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text("Choose from Gallery"),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
