@@ -157,6 +157,7 @@ class _MyAppState extends State<MyApp> {
             titleTextStyle: TextStyle(
               fontSize: 20,
               color: Colors.black,
+              fontWeight: FontWeight.bold
             ),
           ),
           chipTheme: ChipThemeData(
