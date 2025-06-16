@@ -36,7 +36,9 @@ Your app communicates with a local Flask server for AI recommendations and retra
 Make sure to replace all http://192.168.1.10:5000 with your actual local IP.
 
 🔎 recipe_viewmodel.dart (Line 40)
+
 final uri = Uri.parse('http://192.168.1.10:5000/recommend');
 
 🛠️ admin_page.dart (Line 135)
+
 Uri.parse('http://192.168.1.10:5000/retrain');
