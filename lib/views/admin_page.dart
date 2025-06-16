@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 import '../viewmodels/login_viewmodel.dart';
 import 'login_view.dart';
@@ -9,35 +10,34 @@ class AdminHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Example dummy stats (Replace these with real data from ViewModels or Firebase)
     final stats = {
       'Users': 145,
       'Recipes': 320,
       'Pending Recipes': 7,
     };
     final signout = Provider.of<LoginViewModel>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
         automaticallyImplyLeading: false,
         actions: [
           Container(
-              margin: EdgeInsets.only(right: 8),
-              decoration: BoxDecoration(
-                color: Colors.white, // Background color
-                borderRadius: BorderRadius.circular(12), // Adjust radius as needed
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.logout),
-                onPressed: () async {
-                  await signout.signOut();
-
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => const LoginView()),
-                  );
-                },
-                tooltip: 'Logout',
-              )
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () async {
+                await signout.signOut();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const LoginView()),
+                );
+              },
+              tooltip: 'Logout',
+            ),
           )
         ],
       ),
@@ -65,24 +65,27 @@ class AdminHomePage extends StatelessWidget {
             const SizedBox(height: 10),
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.pushNamed(context, '/approveRecipes'); // Create this route
+                Navigator.pushNamed(context, '/approveRecipes');
               },
               icon: const Icon(Icons.check_circle_outline),
               label: const Text('Review Pending Recipes'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(50),
-              ),
+              style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
             ),
             const SizedBox(height: 10),
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.pushNamed(context, '/createRecipe'); // Create this route
+                Navigator.pushNamed(context, '/createRecipe');
               },
               icon: const Icon(Icons.add_circle_outline),
               label: const Text('Add New Community Recipe'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(50),
-              ),
+              style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton.icon(
+              onPressed: () => _triggerRetrain(context),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retrain Recommendation System'),
+              style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
             ),
           ],
         ),
@@ -115,5 +118,39 @@ class AdminHomePage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _triggerRetrain(BuildContext context) async {
+    final scaffold = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://192.168.1.10:5000/retrain'),
+      );
+
+      navigator.pop(); // Remove the loading dialog
+
+      if (response.statusCode == 200) {
+        scaffold.showSnackBar(
+          const SnackBar(content: Text('Model retrained successfully!')),
+        );
+      } else {
+        scaffold.showSnackBar(
+          SnackBar(content: Text('Failed to retrain: ${response.body}')),
+        );
+      }
+    } catch (e) {
+      navigator.pop();
+      scaffold.showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 }

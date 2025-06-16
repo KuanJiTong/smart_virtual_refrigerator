@@ -29,16 +29,47 @@ class _UpdateIngredientsViewState extends State<UpdateIngredientsView> {
   File? _pickedImage;
 
   final List<String> categories = [
-    'Bread', 'Meat', 'Vegetable', 'Fruit', 'Dairy', 'Beverage', 'Spice', 'Grain', 'Condiment',
+    'Meat',
+    'Seafood',
+    'Eggs',
+    'Vegetable',
+    'Fruit',
+    'Dairy',
+    'Grain',
+    'Noodles',
+    'Spice',
+    'Condiment',
+    'Oil & Fat',
+    'Beverage',
+    'Bakery',
+    'Snack',
+    'Sweetener',
+    'Herbs',
+    'Sauce',
+    'Frozen Foods',
+    'Canned Goods',
   ];
 
-  late String selectedCategory;
+  final List<String> quantityUnits = [
+    'Gram',
+    'Milliliter',
+    'Slice',
+    'Piece',
+    'Tablespoon',
+    'Cup',
+    'Teaspoon',
+    'Stalk',
+    'Clove',
+    'Inch',
+    'Whole',
+    'Unit'
+  ];
 
-  final Map<String, String> unitMapping = {
-    'Bread': 'Slice', 'Meat': 'Gram', 'Vegetable': 'Gram', 'Fruit': 'Piece',
-    'Dairy': 'Milliliter', 'Beverage': 'Milliliter', 'Spice': 'Tablespoon',
-    'Grain': 'Gram', 'Condiment': 'Tablespoon',
-  };
+  final List<String> storageLocations = ['Fridge', 'Freezer', 'Pantry'];
+
+  String selectedCategory = '';
+  String selectedUnit = '';
+  String selectedStorage = '';
 
   @override
   void initState() {
@@ -49,6 +80,8 @@ class _UpdateIngredientsViewState extends State<UpdateIngredientsView> {
     );
 
     selectedCategory = widget.ingredient['category'] ?? categories.first;
+    selectedUnit = widget.ingredient['quantityUnit'] ?? quantityUnits.first;
+    selectedStorage = widget.ingredient['storageLocation'] ?? storageLocations.first;
 
     if (widget.ingredient['expiredDate'] != '') {
       hasExpiry = true;
@@ -87,7 +120,6 @@ class _UpdateIngredientsViewState extends State<UpdateIngredientsView> {
 
   @override
   Widget build(BuildContext context) {
-    String quantityUnit = unitMapping[selectedCategory] ?? 'Unit';
     final ingredientVM = Provider.of<UpdateIngredientsViewModel>(context);
 
     return Scaffold(
@@ -166,8 +198,8 @@ class _UpdateIngredientsViewState extends State<UpdateIngredientsView> {
                   ),
                 ),
               const SizedBox(height: 16),
-        
-              // Quantity
+
+              // Quantity with Unit Dropdown
               Row(
                 children: [
                   Expanded(
@@ -175,34 +207,39 @@ class _UpdateIngredientsViewState extends State<UpdateIngredientsView> {
                       controller: quantityController,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        labelText: "Quantity ($quantityUnit)",
+                        labelText: "Quantity",
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter quantity';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'Enter a valid number';
+                        }
+                        return null;
+                      },
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Column(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          int current = int.tryParse(quantityController.text) ?? 0;
-                          quantityController.text = (current + 1).toString();
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.remove),
-                        onPressed: () {
-                          int current = int.tryParse(quantityController.text) ?? 0;
-                          if (current > 0) quantityController.text = (current - 1).toString();
-                        },
-                      ),
-                    ],
+                  SizedBox(width: 8),
+                  DropdownButton<String>(
+                    value: selectedUnit,
+                    items: quantityUnits.map((String unit) {
+                      return DropdownMenuItem<String>(
+                        value: unit,
+                        child: Text(unit),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedUnit = value!;
+                      });
+                    },
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-        
+
               // Category
               DropdownButtonFormField<String>(
                 value: selectedCategory,
@@ -221,6 +258,39 @@ class _UpdateIngredientsViewState extends State<UpdateIngredientsView> {
                     selectedCategory = value!;
                   });
                 },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select a category';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+
+              // Storage Location
+              DropdownButtonFormField<String>(
+                value: selectedStorage,
+                decoration: InputDecoration(
+                  labelText: "Storage Location",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                items: storageLocations.map((String location) {
+                  return DropdownMenuItem<String>(
+                    value: location,
+                    child: Text(location),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedStorage = value!;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select a storage location';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 32),
         
@@ -233,6 +303,8 @@ class _UpdateIngredientsViewState extends State<UpdateIngredientsView> {
                     ingredientVM.updateName(nameController.text);
                     ingredientVM.updateCategory(selectedCategory);
                     ingredientVM.updateQuantity(quantityController.text);
+                    ingredientVM.updateQuantityUnit(selectedUnit);
+                    ingredientVM.updateStorageLocation(selectedStorage);
                     ingredientVM.toggleExpiry(hasExpiry);
 
                     if (hasExpiry) {

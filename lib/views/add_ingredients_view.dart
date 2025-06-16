@@ -31,11 +31,40 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
   File? _pickedImage;
 
   final List<String> categories = [
-    'Bread', 'Meat', 'Vegetable', 'Fruit', 'Dairy', 'Beverage', 'Spice', 'Grain', 'Condiment',
+    'Meat',
+    'Seafood',
+    'Eggs',
+    'Vegetable',
+    'Fruit',
+    'Dairy',
+    'Grain',
+    'Noodles',
+    'Spice',
+    'Condiment',
+    'Oil & Fat',
+    'Beverage',
+    'Bakery',
+    'Snack',
+    'Sweetener',
+    'Herbs',
+    'Sauce',
+    'Frozen Foods',
+    'Canned Goods',
   ];
 
   final List<String> quantityUnits = [
-    'Gram', 'Milliliter', 'Slice', 'Piece', 'Tablespoon', 'Cup', 'Unit'
+    'Gram',
+    'Milliliter',
+    'Slice',
+    'Piece',
+    'Tablespoon',
+    'Cup',
+    'Teaspoon',
+    'Stalk',
+    'Clove',
+    'Inch',
+    'Whole',
+    'Unit'
   ];
 
   final List<String> storageLocations = ['Fridge', 'Freezer', 'Pantry'];

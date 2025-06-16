@@ -6,6 +6,7 @@ import 'package:smart_virtual_refrigerator/viewmodels/login_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/profile_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/views/profile_view.dart';
 import 'package:smart_virtual_refrigerator/views/recipe_community_page.dart';
+import 'package:smart_virtual_refrigerator/views/recipe_details_page.dart';
 import '../views/login_view.dart';
 import 'fridge_page.dart'; // Make sure this path is correct
 import 'package:smart_virtual_refrigerator/viewmodels/recipe_viewmodel.dart';
@@ -89,16 +90,31 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class _HomeBody extends StatelessWidget {
+class _HomeBody extends StatefulWidget {
   const _HomeBody();
 
   @override
-  Widget build(BuildContext context) {
+  State<_HomeBody> createState() => _HomeBodyState();
+}
 
-    final signout = Provider.of<LoginViewModel>(context, listen: false);
-    final recipeVM = Provider.of<RecipeViewModel>(context);
+class _HomeBodyState extends State<_HomeBody> {
+  bool _hasFetchedData = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasFetchedData) {
+      final signout = Provider.of<LoginViewModel>(context, listen: false);
+      final userId = signout.user?.uid ?? "";
+      Provider.of<IngredientViewModel>(context, listen: false).fetchIngredients(userId);
+      Provider.of<RecipeViewModel>(context, listen: false).fetchAIRecommendations();
+      _hasFetchedData = true;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final ingredientVM = Provider.of<IngredientViewModel>(context);
-    ingredientVM.fetchIngredients(signout.user?.uid ?? "");
 
     return Scaffold(
       body: SafeArea(
@@ -147,43 +163,195 @@ class _HomeBody extends StatelessWidget {
             const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text('Recipes you can make',
+                children: [
+                  const Text('Recipes you can make',
                       style: TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 18)),
-                  Icon(Icons.tune),
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: () {
+                      Provider.of<RecipeViewModel>(context, listen: false)
+                          .fetchAIRecommendations();
+                    },
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
-              Column(
-                children: recipeVM.filteredRecipes.map((recipe) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(
-                        vertical: 6, horizontal: 8),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(8),
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          recipe.imageUrl,
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error,
-                              stackTrace) => const Icon(Icons.broken_image),
+              Consumer<RecipeViewModel>(
+                builder: (context, VM, _) {
+                  if (VM.isLoading) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 16),
+                            Text(
+                              'Loading AI recommendations...\nIf it takes too long, try refreshing again.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 14, color: Colors.grey),
+                            ),
+                          ],
                         ),
                       ),
-                      title: Text(recipe.title),
-                      subtitle: Text(recipe.category),
+                    );
+                  }
+
+                  final filteredRecipes = VM.selectedCategory == 'All'
+                      ? VM.aiRecommendedRecipes
+                      : VM.aiRecommendedRecipes
+                      .where((recipe) => recipe.category == VM.selectedCategory)
+                      .toList();
+
+                  if (filteredRecipes.isEmpty) {
+                    return const Text("No AI recommended recipes available.");
+                  }
+
+                  return SizedBox(
+                    height: 250,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        children: filteredRecipes.map((recipe) {
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => RecipeDetailsPage(recipe: recipe),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              width: 250,
+                              height: 250,
+                              margin: const EdgeInsets.only(right: 12),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Stack(
+                                  children: [
+                                    Image.network(
+                                      recipe.imageUrl,
+                                      width: 250,
+                                      height: 250,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                          Container(color: Colors.grey[300]),
+                                    ),
+                                    Container(
+                                      width: 250,
+                                      height: 250,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                          colors: [
+                                            Colors.black.withOpacity(0.3),
+                                            Colors.black.withOpacity(0.7),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 8,
+                                      left: 8,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.7),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          recipe.category,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 12,
+                                      left: 12,
+                                      right: 12,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            recipe.dishName,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Wrap(
+                                            spacing: 4,
+                                            children: recipe.ingredients
+                                                .take(2)
+                                                .map((ing) => Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withOpacity(0.2),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                '${ing['name']}',
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ))
+                                                .toList(),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.star,
+                                                  size: 14, color: Colors.white),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                recipe.numberFavourites?.toString() ?? '12',
+                                                style: const TextStyle(
+                                                    color: Colors.white, fontSize: 12),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
                   );
-                }).toList(),
-
+                },
               ),
+
               const SizedBox(height: 24),
               Row(
                 children: [
@@ -203,8 +371,6 @@ class _HomeBody extends StatelessWidget {
                         errorBuilder: (context, error, stackTrace) =>
                             Icon(Icons.image)),
                     title: Text(ingredient.name),
-                    subtitle: Text(
-                        '${ingredient.daysLeftToExpire} day(s) left'),
                     trailing: Text(ingredient.quantity),
                   );
                 }).toList(),

@@ -1,13 +1,39 @@
 class Recipe {
-  final String title;
-  final List<String> ingredients;
-  final String category;
+  final String dishName;
+  final String style;
   final String imageUrl;
+  final String description;
+  final String category;
+  final int numberFavourites;
+  final String userId;
+  final List<Map<String, dynamic>> ingredients;
+  final List<dynamic> cookingSteps;
 
   Recipe({
-    required this.title,
-    required this.ingredients,
-    required this.category,
+    required this.dishName,
+    required this.style,
     required this.imageUrl,
+    required this.description,
+    required this.category,
+    required this.numberFavourites,
+    required this.userId,
+    required this.ingredients,
+    required this.cookingSteps,
   });
+
+  factory Recipe.fromJson(Map<String, dynamic> json) {
+    return Recipe(
+      dishName: json['dish_name'] ?? '',
+      style: json['style'] ?? '',
+      imageUrl: json['image_url'] ?? '',
+      description: json['description'] ?? '',
+      category: json['category'] ?? '',
+      numberFavourites: json['number_favourites'] ?? 0,
+      userId: json['userId'] ?? '',
+      ingredients: (json['ingredients'] as List<dynamic>)
+          .map((item) => item as Map<String, dynamic>)
+          .toList(),
+      cookingSteps: json['cooking_steps'] ?? '',
+    );
+  }
 }

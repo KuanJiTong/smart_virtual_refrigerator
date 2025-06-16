@@ -87,6 +87,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => ProfileViewModel()),
         ChangeNotifierProvider(create: (_) => FridgeViewModel()),
         ChangeNotifierProvider(create: (_) => AddIngredientViewModel()),
+        ChangeNotifierProvider(create: (_) => RecipeViewModel()),
         ChangeNotifierProvider(create: (_) => UpdateIngredientsViewModel()),
         ChangeNotifierProvider(create: (_) => IngredientViewModel()),
         ChangeNotifierProvider(create: (_) => LeftoverViewModel()),
