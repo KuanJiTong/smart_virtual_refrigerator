@@ -25,6 +25,8 @@ class FirestoreService {
     required String dishName,
     required String description,
     required String style,
+    required String category,
+    required int numberFavourites,
     required List<Map<String, String>> ingredients,
     required List<String> cookingSteps,
     required String imageUrl,
@@ -35,6 +37,8 @@ class FirestoreService {
       'style': style,
       'ingredients': ingredients,
       'cooking_steps': cookingSteps,
+      'category': category,
+      'number_favourites': numberFavourites,
       'image_url': imageUrl,
     };
 

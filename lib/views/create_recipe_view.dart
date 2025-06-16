@@ -110,6 +110,16 @@ class _CreateRecipePageBodyState extends State<_CreateRecipePageBody> {
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
                       validator: (val) => val == null || val.trim().isEmpty ? 'Required' : null,
                     ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: vm.selectedCategory,
+                      decoration: InputDecoration(
+                        labelText: 'Category',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      items: vm.categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                      onChanged: (val) => setState(() => vm.selectedCategory = val!),
+                    ),
                     const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

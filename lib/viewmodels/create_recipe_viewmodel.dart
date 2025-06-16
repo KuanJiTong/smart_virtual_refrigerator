@@ -13,8 +13,22 @@ class CreateRecipeViewModel extends ChangeNotifier {
   final List<Map<String, dynamic>> ingredients = [];
   final List<TextEditingController> cookingSteps = [];
 
+  String selectedCategory = 'Breakfast'; // default category
+  final List<String> categories = ['Breakfast', 'Lunch', 'Dinner', 'Dessert'];
+
   final List<String> quantityUnits = [
-    'Gram', 'Milliliter', 'Slice', 'Piece', 'Tablespoon', 'Cup', 'Unit'
+    'Gram',
+    'Milliliter',
+    'Slice',
+    'Piece',
+    'Tablespoon',
+    'Cup',
+    'Teaspoon',
+    'Stalk',
+    'Clove',
+    'Inch',
+    'Whole',
+    'Unit'
   ];
 
   File? pickedImage;
@@ -68,7 +82,6 @@ class CreateRecipeViewModel extends ChangeNotifier {
         imageUrl = await _storageService.uploadIngredientImage(pickedImage!);
       }
 
-      // 👇 Explicit casting to Map<String, String>
       final List<Map<String, String>> formattedIngredients = ingredients.map((i) => {
         'name': (i['name'] as TextEditingController).text.trim(),
         'quantity': (i['quantity'] as TextEditingController).text.trim(),
@@ -84,6 +97,8 @@ class CreateRecipeViewModel extends ChangeNotifier {
         ingredients: formattedIngredients,
         cookingSteps: formattedCookingSteps,
         imageUrl: imageUrl,
+        category: selectedCategory,
+        numberFavourites: 0,
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
