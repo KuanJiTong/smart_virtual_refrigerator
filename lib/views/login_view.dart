@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_virtual_refrigerator/services/auth_service.dart';
+import 'package:smart_virtual_refrigerator/views/admin_page.dart';
 import 'package:smart_virtual_refrigerator/views/forgot_password_view.dart';
 import '../viewmodels/login_viewmodel.dart';
 import 'home_page.dart';
@@ -87,9 +90,20 @@ class LoginViewState extends State<LoginView> {
                                   final success = await Provider.of<LoginViewModel>(context, listen: false).signinWithGoogle();
 
                                   if (success) {
-                                    Navigator.of(context).pushReplacement(
-                                      MaterialPageRoute(builder: (context) => HomePage()),
-                                    );
+                                    bool isAdmin = await AuthService().isCurrentUserAdmin();
+
+                                    if (isAdmin) {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (_) => const AdminHomePage()),
+                                      );
+                                    } else {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (_) => const HomePage()),
+                                      );
+                                    }
+
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text('Google sign-in failed')),
@@ -195,9 +209,21 @@ class LoginViewState extends State<LoginView> {
                                   if (_formKey.currentState!.validate()) {
                                     try {
                                       await vm.login();
-                                      Navigator.of(context).pushReplacement(
-                                        MaterialPageRoute(builder: (context) => HomePage()),
-                                      );
+
+                                      bool isAdmin = await AuthService().isCurrentUserAdmin();
+
+                                      if (isAdmin) {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(builder: (_) => const SignupView()),
+                                        );
+                                      } else {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(builder: (_) => const HomePage()),
+                                        );
+                                      }
+
                                     } catch (error) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(content: Text(error.toString())),

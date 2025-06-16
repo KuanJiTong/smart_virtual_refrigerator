@@ -21,6 +21,26 @@ class FirestoreService {
       return [];
     }
   }
+  Future<void> addRecipe({
+    required String dishName,
+    required String description,
+    required String style,
+    required List<Map<String, String>> ingredients,
+    required List<String> cookingSteps,
+    required String imageUrl,
+  }) async {
+    final Map<String, dynamic> recipeData = {
+      'dish_name': dishName,
+      'description': description,
+      'style': style,
+      'ingredients': ingredients,
+      'cooking_steps': cookingSteps,
+      'image_url': imageUrl,
+    };
+
+    await _firestore.collection('recipes').add(recipeData);
+  }
+
 
   Future<void> addIngredient({
     required String userId,

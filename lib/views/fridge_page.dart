@@ -22,17 +22,9 @@ class FridgePage extends StatefulWidget {
 class _FridgePageState extends State<FridgePage> {
 
   @override
-  void initState() {
-    super.initState();
-    Future.microtask(() {
-      Provider.of<FridgeViewModel>(context, listen: false).loadIngredients();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => FridgeViewModel(),
+      create: (_) => FridgeViewModel()..loadIngredients(),
       child: Consumer<FridgeViewModel>(
         builder: (context, vm, _) {
           return FridgeViewBody();

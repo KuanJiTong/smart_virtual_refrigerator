@@ -62,4 +62,17 @@ class AuthService {
   String? get userId {
     return _firebaseAuth.currentUser?.uid;
   }
+
+  Future<bool> isCurrentUserAdmin() async {
+    User? user = _firebaseAuth.currentUser;
+
+    if (user != null) {
+      IdTokenResult tokenResult = await user.getIdTokenResult(true); // Force refresh
+      final claims = tokenResult.claims;
+      print("admin");
+      return claims?['admin'] == true;
+    }
+    print("test");
+    return false;
+  }
 }

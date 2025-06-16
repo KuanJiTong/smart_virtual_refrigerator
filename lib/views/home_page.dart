@@ -5,6 +5,7 @@ import 'package:smart_virtual_refrigerator/viewmodels/ingredient_viewmodel.dart'
 import 'package:smart_virtual_refrigerator/viewmodels/login_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/profile_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/views/profile_view.dart';
+import 'package:smart_virtual_refrigerator/views/recipe_community_page.dart';
 import '../views/login_view.dart';
 import 'fridge_page.dart'; // Make sure this path is correct
 import 'package:smart_virtual_refrigerator/viewmodels/recipe_viewmodel.dart';
@@ -24,7 +25,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _pages = [
     const _HomeBody(),
-    const Center(child: Text('Favorites')),
+    RecipeCommunityPage(),
     const FridgePage(),
     const Center(child: Text('Cart')),
     const Center(child: Text('Settings')),
