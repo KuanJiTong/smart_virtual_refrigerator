@@ -20,6 +20,7 @@ class AddIngredientsView extends StatefulWidget {
 }
 
 class _AddIngredientsViewState extends State<AddIngredientsView> {
+  final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   final TextEditingController nameController = TextEditingController();
   final TextEditingController quantityController = TextEditingController();
@@ -94,187 +95,225 @@ class _AddIngredientsViewState extends State<AddIngredientsView> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: ListView(
-              children: [
-                Center(
-                  child: _pickedImage != null
-                      ? Image.file(_pickedImage!, height: 150)
-                      : widget.imageUrl != null
-                      ? Image.network(widget.imageUrl!, height: 150)
-                      : Container(
-                          height: 150,
-                          width: 150,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.add_a_photo, size: 50),
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                children: [
+                  Center(
+                    child: _pickedImage != null
+                        ? Image.file(_pickedImage!, height: 150)
+                        : widget.imageUrl != null
+                        ? Image.network(widget.imageUrl!, height: 150)
+                        : Container(
+                      height: 150,
+                      width: 150,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.add_a_photo, size: 50),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Center(
+                    child: Column(
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: _showImageSourceDialog,
+                          icon: const Icon(Icons.upload),
+                          label: const Text("Upload Image"),
                         ),
-                ),
-                SizedBox(height: 8),
-                Center(
-                  child: Column(
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 8),
+
+                  // Name
+                  TextFormField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      labelText: "Name",
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter a name';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 16),
+
+                  // Expire Switch
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: _showImageSourceDialog,
-                        icon: const Icon(Icons.upload),
-                        label: const Text("Upload Image"),
+                      Text("Expire", style: TextStyle(fontSize: 16)),
+                      Switch(
+                        value: hasExpiry,
+                        onChanged: (val) {
+                          setState(() => hasExpiry = val);
+                        },
+                      )
+                    ],
+                  ),
+                  SizedBox(height: 8),
+
+                  // Expiration Date
+                  if (hasExpiry)
+                    TextFormField(
+                      controller: dateController,
+                      readOnly: true,
+                      onTap: () => _selectDate(context),
+                      decoration: InputDecoration(
+                        labelText: "Expiration Date",
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select expiration date';
+                        }
+                        return null;
+                      },
+                    ),
+                  SizedBox(height: 16),
+
+                  // Quantity with Unit Dropdown
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: quantityController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: "Quantity",
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter quantity';
+                            }
+                            if (double.tryParse(value) == null) {
+                              return 'Enter a valid number';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      DropdownButton<String>(
+                        value: selectedUnit,
+                        items: quantityUnits.map((String unit) {
+                          return DropdownMenuItem<String>(
+                            value: unit,
+                            child: Text(unit),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedUnit = value!;
+                          });
+                        },
                       ),
                     ],
                   ),
-                ),
-                SizedBox(height: 8),
+                  SizedBox(height: 16),
 
-                // Name
-                TextFormField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    labelText: "Name",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                SizedBox(height: 16),
-
-                // Expire Switch
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Expire", style: TextStyle(fontSize: 16)),
-                    Switch(
-                      value: hasExpiry,
-                      onChanged: (val) {
-                        setState(() => hasExpiry = val);
-                      },
-                    )
-                  ],
-                ),
-                SizedBox(height: 8),
-
-                // Expiration Date
-                if (hasExpiry)
-                  TextFormField(
-                    controller: dateController,
-                    readOnly: true,
-                    onTap: () => _selectDate(context),
+                  // Category
+                  DropdownButtonFormField<String>(
+                    value: selectedCategory,
                     decoration: InputDecoration(
-                      labelText: "Expiration Date",
+                      labelText: "Category",
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
+                    items: categories.map((String category) {
+                      return DropdownMenuItem<String>(
+                        value: category,
+                        child: Text(category),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedCategory = value!;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a category';
+                      }
+                      return null;
+                    },
                   ),
-                SizedBox(height: 16),
+                  SizedBox(height: 16),
 
-                // Quantity with Unit Dropdown
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: quantityController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: "Quantity",
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      ),
+                  // Storage Location
+                  DropdownButtonFormField<String>(
+                    value: selectedStorage,
+                    decoration: InputDecoration(
+                      labelText: "Storage Location",
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    SizedBox(width: 8),
-                    DropdownButton<String>(
-                      value: selectedUnit,
-                      items: quantityUnits.map((String unit) {
-                        return DropdownMenuItem<String>(
-                          value: unit,
-                          child: Text(unit),
+                    items: storageLocations.map((String location) {
+                      return DropdownMenuItem<String>(
+                        value: location,
+                        child: Text(location),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedStorage = value!;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a storage location';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 32),
+
+                  // Add Button
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (!_formKey.currentState!.validate()) return;
+
+                      setState(() => _isLoading = true);
+
+                      try {
+                        ingredientVM.updateName(nameController.text);
+                        ingredientVM.updateCategory(selectedCategory);
+                        ingredientVM.updateQuantity(quantityController.text);
+                        ingredientVM.updateQuantityUnit(selectedUnit);
+                        ingredientVM.toggleExpiry(hasExpiry);
+                        ingredientVM.updateStorageLocation(selectedStorage);
+                        if (hasExpiry) {
+                          ingredientVM.updateExpirationDate(selectedDate);
+                        }
+
+                        if (_pickedImage != null) {
+                          String uploadedImageUrl = await ingredientVM.uploadPickedImageToFirebase(_pickedImage!);
+                          ingredientVM.setImage(uploadedImageUrl);
+                        } else {
+                          ingredientVM.setImage(widget.imageUrl ?? '');
+                        }
+
+                        await ingredientVM.addIngredientToFirebase();
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Ingredient added to fridge')),
                         );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedUnit = value!;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
 
-                // Category
-                DropdownButtonFormField<String>(
-                  value: selectedCategory,
-                  decoration: InputDecoration(
-                    labelText: "Category",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  items: categories.map((String category) {
-                    return DropdownMenuItem<String>(
-                      value: category,
-                      child: Text(category),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedCategory = value!;
-                    });
-                  },
-                ),
-                SizedBox(height: 16),
-
-                // Storage Location
-                DropdownButtonFormField<String>(
-                  value: selectedStorage,
-                  decoration: InputDecoration(
-                    labelText: "Storage Location",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  items: storageLocations.map((String location) {
-                    return DropdownMenuItem<String>(
-                      value: location,
-                      child: Text(location),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedStorage = value!;
-                    });
-                  },
-                ),
-                SizedBox(height: 32),
-
-                // Add Button
-                ElevatedButton(
-                  onPressed: () async {
-                    setState(() => _isLoading = true);
-
-                    try {
-                      ingredientVM.updateName(nameController.text);
-                      ingredientVM.updateCategory(selectedCategory);
-                      ingredientVM.updateQuantity(quantityController.text);
-                      ingredientVM.updateQuantityUnit(selectedUnit);
-                      ingredientVM.toggleExpiry(hasExpiry);
-                      ingredientVM.updateStorageLocation(selectedStorage);
-                      if (hasExpiry) {
-                        ingredientVM.updateExpirationDate(selectedDate);
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const HomePage(initialIndex: 2)));
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to add ingredient: $e')),
+                        );
+                      } finally {
+                        setState(() => _isLoading = false);
                       }
-
-                      if (_pickedImage != null) {
-                        String uploadedImageUrl = await ingredientVM.uploadPickedImageToFirebase(_pickedImage!);
-                        ingredientVM.setImage(uploadedImageUrl);
-                      } else {
-                        ingredientVM.setImage(widget.imageUrl ?? '');
-                      }
-
-                      await ingredientVM.addIngredientToFirebase();
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Ingredient added to fridge')),
-                      );
-
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const HomePage(initialIndex: 2)));
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to add ingredient: $e')),
-                      );
-                    } finally {
-                      setState(() => _isLoading = false);
-                    }
-                  },
-                  child: Text("Add to Fridge"),
-                ),
-              ],
+                    },
+                    child: Text("Add to Fridge"),
+                  ),
+                ],
+              ),
             ),
           ),
           if (_isLoading)
