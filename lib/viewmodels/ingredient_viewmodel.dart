@@ -7,7 +7,7 @@ class IngredientViewModel extends ChangeNotifier {
 
   List<Ingredient> get ingredients => _ingredients;
 
-  List<Ingredient> get expiringSoonIngredients {
+ List<Ingredient> get expiringSoonIngredients {
     final now = DateTime.now();
     return _ingredients
         .where((i) =>
@@ -16,6 +16,7 @@ class IngredientViewModel extends ChangeNotifier {
         .toList()
       ..sort((a, b) => a.expiredDate.compareTo(b.expiredDate));
   }
+
 
   Future<void> fetchIngredients(String userId) async {
     try {
