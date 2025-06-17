@@ -60,7 +60,7 @@ class RecipeViewModel extends ChangeNotifier {
         "name": ingredient['name'],
       }).toList();
 
-      final uri = Uri.parse('http://192.168.1.3:5000/recommend');
+      final uri = Uri.parse('http://127.0.0.1:5000/recommend');
       final response = await http.post(
         uri,
         headers: {'Content-Type': 'application/json'},

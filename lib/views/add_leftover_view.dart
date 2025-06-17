@@ -198,7 +198,6 @@ class _AddLeftoverViewState extends State<AddLeftoverView> {
                 value: _selectedCategory.isEmpty ? null : _selectedCategory,
                 items: ['Home Cooked Meal',
                         'Takeout / Delivery',
-                        'Half-used Ingredients',
                         'Snacks',
                         'Desserts',
                         'Soups & Stews',
