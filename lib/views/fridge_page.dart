@@ -632,21 +632,6 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
             const SizedBox(height: 24),
             Row(
               children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      elevation: 4,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text('Apply Filters'),
-                  ),
-                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
