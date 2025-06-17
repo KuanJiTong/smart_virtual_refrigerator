@@ -51,7 +51,8 @@ class FridgeViewModel extends ChangeNotifier {
       final matchesCategory = selectedCategory == 'All' || item['category'] == selectedCategory;
       final matchesSearch = item['name'].toString().toLowerCase().contains(searchKeyword.toLowerCase());
       final matchesExpiry = expiryFilter == ExpiryFilter.all ||
-          (expiryFilter == ExpiryFilter.expiringSoon && item['daysLeftToExpire'] <= 5);
+          (expiryFilter == ExpiryFilter.expiringSoon &&
+              DateTime.now().difference(DateTime.parse(item['expiredDate'])).inDays <= 5);
       final matchesQuantity = quantityFilter == QuantityFilter.all ||
           (quantityFilter == QuantityFilter.lowStock && _isLowStock(item['quantity']));
 
@@ -63,7 +64,13 @@ class FridgeViewModel extends ChangeNotifier {
         filtered.sort((a, b) => a['name'].compareTo(b['name']));
         break;
       case SortOrder.expirySoonest:
-        filtered.sort((a, b) => a['daysLeftToExpire'].compareTo(b['daysLeftToExpire']));
+        filtered.sort((a, b) {
+          final aDate = DateTime.parse(a['expiredDate']);
+          final bDate = DateTime.parse(b['expiredDate']);
+          final aDaysLeft = aDate.difference(DateTime.now()).inDays;
+          final bDaysLeft = bDate.difference(DateTime.now()).inDays;
+          return aDaysLeft.compareTo(bDaysLeft);
+        });
         break;
       case SortOrder.quantityHighToLow:
         filtered.sort((a, b) => _extractQuantity(b['quantity']).compareTo(_extractQuantity(a['quantity'])));

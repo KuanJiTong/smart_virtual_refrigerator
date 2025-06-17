@@ -66,4 +66,15 @@ class LeftoverViewModel extends ChangeNotifier {
     }
   }
 
+  List<Leftover> get expiringSoonLeftovers {
+   final now = DateTime.now();
+    return _leftovers
+        .where((i) =>
+    i.expiryDate!.isAfter(now) &&
+        i.expiryDate!.difference(now).inDays <= 5)
+        .toList()
+      ..sort((a, b) => a.expiryDate!.compareTo(b.expiryDate!));
+}
+
+
 }
