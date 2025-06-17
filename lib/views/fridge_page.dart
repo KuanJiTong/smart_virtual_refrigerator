@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_virtual_refrigerator/utils/popup.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/leftover_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/views/update_ingredients_view.dart';
 import 'package:smart_virtual_refrigerator/views/add_leftover_view.dart';
@@ -128,6 +129,7 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
                         Row(
                           children: [
                             Text('${vm.allLeftovers.length} items', style: const TextStyle(color: Colors.grey)),
+                            
                             if (vm.allLeftovers.length > 3)
                               TextButton(
                                 onPressed: () async {
@@ -169,6 +171,9 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
                             name: leftover['name'],
                             expiryDate: leftover['expiryDate'],
                             quantity: leftover['quantity'],
+                            category: leftover['category'],
+                            location: leftover['location'],
+                            notes: leftover['notes'],                            
                             onTap: () async {
                               final result = await Navigator.push(
                                 context,
@@ -328,10 +333,14 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
   required String name,
   required String expiryDate,
   required int quantity,
+  required String category,
+  required String location,
+  String? notes,
   required VoidCallback onTap,
 }) {
   Widget imageWidget;
-  final isExpired = DateTime.parse(expiryDate).difference(DateTime.now()).inDays <= 0;
+  final dayToExpiry = DateTime.parse(expiryDate).difference(DateTime.now()).inDays;
+  final isExpired = dayToExpiry < 0;
   if (imageUrl != null && imageUrl.isNotEmpty) {
     imageWidget = Image.network(
       imageUrl,
@@ -375,9 +384,64 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: imageWidget,
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: imageWidget,
+                ),
+
+                if (notes != null && notes.isNotEmpty)
+                 Positioned(
+                  top: 8.0,
+                  right: 8.0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      // ignore: deprecated_member_use
+                      color: Colors.white.withOpacity(0.85), // light background box
+                      borderRadius: BorderRadius.circular(6), // rounded corners
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 4,
+                          offset: Offset(1, 1),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.sticky_note_2_outlined, // pick your icon here
+                        size: 13,
+                        color: Colors.black87,
+                      ),
+                      tooltip: 'Show Note',
+                      padding: EdgeInsets.all(4), // spacing inside box
+                      constraints: BoxConstraints(), // removes default IconButton size
+                      onPressed: () => showNoteDialog(context, name, notes),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 6,
+                  left: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 4, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      category,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Row(
@@ -386,26 +450,45 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        name,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
+                      Tooltip(
+                        message: '$name ($location)',
+                        waitDuration: Duration(milliseconds: 500), 
+                        child: Text(
+                          '$name ($location)',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       ),
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.access_time,
-                            color: isExpired ? const Color(0xFFE85C5C) : Colors.grey,
-                            size: 16,
+                            color: isExpired
+                                  ? const Color(0xFFE85C5C) // expired
+                                  : dayToExpiry <= 2
+                                      ? const Color(0xFFFF9800) // almost expired
+                                      : Colors.grey,  
+                            size: 12,
                           ),
-                          const SizedBox(width: 4), // Small space between icon and text
+                          const SizedBox(width: 2), // Small space between icon and text
 
-                          Text(
-                            expiryDate,
-                            style: TextStyle(
-                              color: isExpired ? const Color(0xFFE85C5C) : Colors.grey,
-                              fontSize: 12,
+                          Padding(
+                              padding: const EdgeInsets.only(top: 2.5),                            
+                              child: Text(
+                              '$expiryDate (${isExpired ? 'Expired' : '$dayToExpiry day${dayToExpiry == 1 ? '' : 's'} left'})',
+                              style: TextStyle(
+                                color: isExpired
+                                        ? const Color(0xFFE85C5C) // expired
+                                        : dayToExpiry <= 2
+                                            ? const Color(0xFFFF9800) // almost expired
+                                            : Colors.grey,                                
+                                fontSize: 9.5,
+                              ),
                             ),
                           ),
                         ],
