@@ -37,7 +37,7 @@ class RecipeViewModel extends ChangeNotifier {
 
       print("Sending ingredients: $ingredientsJson");
 
-      final uri = Uri.parse('http://192.168.1.10:5000/recommend');
+      final uri = Uri.parse('http://192.168.1.3:5000/recommend');
       final response = await http.post(
         uri,
         headers: {'Content-Type': 'application/json'},
