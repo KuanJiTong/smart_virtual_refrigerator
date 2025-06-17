@@ -118,4 +118,17 @@ class RecipeViewModel extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  List<Recipe> _allRecipes = [];
+List<Recipe> get allRecipes => _allRecipes;
+List<Recipe> get favouriteRecipes => _allRecipes.where((r) => isFavourite(r.id)).toList();
+
+Future<void> fetchAllRecipesWithFavourites() async {
+  final userId = _authService.userId;
+  if (userId == null) return;
+
+  _allRecipes = await _firestoreService.fetchAllRecipes();
+  _favouriteRecipeIds = await _firestoreService.getFavouriteRecipeIds(userId);
+  notifyListeners();
+}
 }

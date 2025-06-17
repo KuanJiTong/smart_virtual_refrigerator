@@ -12,6 +12,7 @@ class RecipeDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool updated = false; 
     return Scaffold(
       body: Column(
         children: [
@@ -37,7 +38,9 @@ class RecipeDetailsPage extends StatelessWidget {
                   backgroundColor: Colors.white,
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      Navigator.pop(context, updated);
+                    },
                   ),
                 ),
               ),
@@ -59,7 +62,7 @@ class RecipeDetailsPage extends StatelessWidget {
                       child: Consumer<RecipeViewModel>(
                         builder: (context, viewModel, _) {
                           final isFav = viewModel.isFavourite(recipe.id);
-
+                         
                           return IconButton(
                             icon: Icon(
                               isFav ? Icons.favorite : Icons.favorite_border,
@@ -67,6 +70,7 @@ class RecipeDetailsPage extends StatelessWidget {
                             ),
                             onPressed: () async {
                               await viewModel.toggleFavourite(recipe);
+                              updated = true;
                             },
                           );
                         },
