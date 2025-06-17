@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_virtual_refrigerator/models/ingredient.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/ingredient_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/leftover_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/login_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/profile_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/views/profile_view.dart';
@@ -108,6 +109,7 @@ class _HomeBodyState extends State<_HomeBody> {
       final userId = signout.user?.uid ?? "";
       Provider.of<IngredientViewModel>(context, listen: false).fetchIngredients(userId);
       Provider.of<RecipeViewModel>(context, listen: false).fetchAIRecommendations();
+      Provider.of<LeftoverViewModel>(context, listen: false).fetchLeftovers();
       _hasFetchedData = true;
     }
   }
@@ -115,6 +117,25 @@ class _HomeBodyState extends State<_HomeBody> {
   @override
   Widget build(BuildContext context) {
     final ingredientVM = Provider.of<IngredientViewModel>(context);
+    final leftoverVM = Provider.of<LeftoverViewModel>(context);
+
+     final expiringSoonItems = [
+    ...ingredientVM.expiringSoonIngredients.map((e) => {
+          'type': 'ingredient',
+          'name': e.name,
+          'quantity': e.quantity,
+          'image': e.image,
+          'expiry': e.expiredDate, 
+        }),
+    ...leftoverVM.expiringSoonLeftovers.map((e) => {
+          'type': 'leftover',
+          'name': e.name,
+          'quantity': e.quantity.toString(),
+          'image': e.imageUrl ?? '',
+          'expiry': e.expiryDate,
+        }),
+  ]..sort((a, b) => (a['expiry'] as DateTime).compareTo(b['expiry'] as DateTime));
+
 
     return Scaffold(
       body: SafeArea(
@@ -354,26 +375,87 @@ class _HomeBodyState extends State<_HomeBody> {
 
               const SizedBox(height: 24),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Expiring soon',
                       style: TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 18)),
                   const Spacer(),
+                  Text(
+                    '${expiringSoonItems.length} items',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
-              Column(
-                children: ingredientVM.expiringSoonIngredients.map((
-                    ingredient) {
-                  return ListTile(
-                    leading: Image.network(ingredient.image, width: 50,
-                        height: 50,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Icon(Icons.image)),
-                    title: Text(ingredient.name),
-                    trailing: Text(ingredient.quantity),
-                  );
-                }).toList(),
+              SizedBox(
+              height: 140,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: expiringSoonItems.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final item = expiringSoonItems[index];
+
+                  final String name = item['name'] as String? ?? '';
+                  final String image = item['image'] as String? ?? '';
+                  final DateTime expiry = item['expiry'] as DateTime; 
+                  final String type = item['type'] as String? ?? '';
+                  
+                  return Container(
+                    width: 120,
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F8F8),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Image
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            image,
+                            width: double.infinity,
+                            height: 70,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.image),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+
+                        // Name
+                        Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+
+                        Text(
+                          type == 'ingredient' ? 'Ingredient' : 'Leftover',
+                          style: TextStyle(
+                          fontSize: 11,
+                          color: type == 'ingredient' ? Colors.blue : Colors.green,
+                          fontWeight: FontWeight.w500,
+                          ),
+                        ),
+
+                        // Expiry Date
+                       Text(
+                            '${expiry.difference(DateTime.now()).inDays} day(s) left',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
