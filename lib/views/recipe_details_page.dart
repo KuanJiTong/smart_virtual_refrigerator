@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/recipe.dart';
+import 'instruction_page.dart';
 
 class RecipeDetailsPage extends StatelessWidget {
   final Recipe recipe;
@@ -14,17 +15,11 @@ class RecipeDetailsPage extends StatelessWidget {
           // Top image section
           Stack(
             children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(32),
-                  bottomRight: Radius.circular(32),
-                ),
-                child: Image.network(
-                  recipe.imageUrl,
-                  height: 260,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
+              Image.network(
+                recipe.imageUrl,
+                height: 260,
+                width: double.infinity,
+                fit: BoxFit.cover,
               ),
               Positioned(
                 top: 40,
@@ -65,45 +60,78 @@ class RecipeDetailsPage extends StatelessWidget {
 
           // Details section
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              children: [
-                
-                const SizedBox(height: 12),
-                Text(recipe.dishName,
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text("Classic ${recipe.style} recipe",
-                    style: const TextStyle(color: Colors.grey)),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                children: [
+                  const SizedBox(height: 12),
+                  Text(recipe.dishName,
+                      style: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(recipe.description, style: const TextStyle(color: Colors.grey)),
+                  const SizedBox(height: 2),
+                  Text("Classic ${recipe.style} recipe",
+                      style: const TextStyle(color: Colors.grey)),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.favorite, color: Colors.red, size: 18),
+                      const SizedBox(width: 4),
+                      Text("${recipe.numberFavourites} favourites",
+                          style: const TextStyle(color: Colors.grey)),
+                    ],
+                  ),
 
-                const SizedBox(height: 16),
-                
 
-                const SizedBox(height: 24),
-                const Text("Ingredients",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                for (var ing in recipe.ingredients)
-                  _ingredientTile(
-                      ing['name'],
-                      ing['quantity']?.toString() ?? '',
-                      ing['unit'] ?? ''),
+                  const SizedBox(height: 16),
 
-                const SizedBox(height: 24),
-                const Text("Cooking Steps",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                ...recipe.cookingSteps
-                    .asMap()
-                    .entries
-                    .map((e) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Text("${e.key + 1}. ${e.value}"),
-                        )),
-              ],
+                  const SizedBox(height: 24),
+                  const Text("Ingredients",
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  for (var ing in recipe.ingredients)
+                    _ingredientTile(
+                        ing['name'],
+                        ing['quantity']?.toString() ?? '',
+                        ing['unit'] ?? ''),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => InstructionPage(recipe: recipe),
+                        ),
+                      );
+                    },
+                    child: const Text('Make this Recipe'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.yellow,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
+                    ),
+                  ),
+
+                ],
+              ),
             ),
           )
+
         ],
       ),
     );
