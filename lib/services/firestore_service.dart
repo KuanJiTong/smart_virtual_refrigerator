@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import '../models/recipe.dart';
+
 
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -173,4 +175,17 @@ class FirestoreService {
         .doc(recipeId)
         .update({'number_favourites': count});
   }
+
+  Future<List<Recipe>> fetchAllRecipes() async {
+    final snapshot = await FirebaseFirestore.instance.collection('recipes').get();
+
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id; // Manually add the document ID into the map
+      return Recipe.fromJson(data);
+    }).toList();
+  }
 }
+
+
+
