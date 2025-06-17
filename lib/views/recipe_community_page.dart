@@ -59,6 +59,39 @@ class RecipeCommunityPage extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: ListView(
                 children: [
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Icons.search),
+                            hintText: 'Search by dish name',
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: (value) {
+                            Provider.of<RecipeViewModel>(context, listen: false).filterRecipes(value);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      IconButton(
+                        icon: const Icon(Icons.filter_list),
+                        onPressed: () {
+                          final viewModel = Provider.of<RecipeViewModel>(context, listen: false);
+                          showModalBottomSheet(
+                            context: context,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                            ),
+                            builder: (newContext) => _buildFilterSheet(newContext, viewModel),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
                   const Text(
                     'Your Bookmarked Recipes',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -78,6 +111,7 @@ class RecipeCommunityPage extends StatelessWidget {
                         },
                       ),
                     ),
+                    
                   const SizedBox(height: 24),
                   const Text(
                     'Community Recipes',
@@ -172,5 +206,88 @@ class RecipeCommunityPage extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildFilterSheet(BuildContext context, RecipeViewModel vm) {
+  void refreshAndReopen(BuildContext context, void Function() updateFilter) {
+    updateFilter();
+    Navigator.pop(context);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+        showModalBottomSheet(
+          context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (newContext) => _buildFilterSheet(newContext, vm),
+        );
+      }
+    });
+  }
+
+  return SafeArea(
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          const Text('Filters', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+
+          const Text('Sort By'),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: [
+              ChoiceChip(
+                label: const Text('Name A-Z'),
+                selected: vm.sortOption == 'name',
+                onSelected: (_) {
+                  refreshAndReopen(context, () => vm.updateSortOption('name'));
+                },
+              ),
+              ChoiceChip(
+                label: const Text('Most Favourited'),
+                selected: vm.sortOption == 'favourites',
+                onSelected: (_) {
+                  refreshAndReopen(context, () => vm.updateSortOption('favourites'));
+                },
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    refreshAndReopen(context, () {
+                      vm.updateSortOption('name');
+                      vm.filterRecipes('');
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    elevation: 4,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Clear Filters'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+
 
 }

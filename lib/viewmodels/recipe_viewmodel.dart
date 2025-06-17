@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../models/recipe.dart';
@@ -9,19 +8,20 @@ import '../services/firestore_service.dart';
 class RecipeViewModel extends ChangeNotifier {
   final FirestoreService _firestoreService = FirestoreService();
   final AuthService _authService = AuthService();
+  String _sortOption = 'name'; // default
+  String get sortOption => _sortOption;
 
   List<Map<String, dynamic>> _ingredients = [];
-  List<Recipe> _aiRecommendedRecipes = [];
   bool isLoading = false;
 
+  // ========== AI Recommended Recipes ==========
+  List<Recipe> _aiRecommendedRecipes = [];
   String _searchQuery = '';
   String _selectedCategory = 'All';
 
-  Set<String> _favouriteRecipeIds = {};
-
   List<Recipe> get aiRecommendedRecipes => _aiRecommendedRecipes;
 
-  List<Recipe> get filteredRecipes {
+  List<Recipe> get filteredAiRecipes {
     return _aiRecommendedRecipes.where((recipe) {
       final matchesCategory = _selectedCategory == 'All' || recipe.category == _selectedCategory;
       final matchesSearch = _searchQuery.isEmpty ||
@@ -31,7 +31,6 @@ class RecipeViewModel extends ChangeNotifier {
   }
 
   List<String> get categories => ['All', 'Breakfast', 'Lunch', 'Dinner'];
-
   String get selectedCategory => _selectedCategory;
 
   void updateSearch(String query) {
@@ -55,7 +54,6 @@ class RecipeViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Fetch ingredients
       _ingredients = await _firestoreService.fetchIngredients(userId);
 
       final ingredientsJson = _ingredients.map((ingredient) => {
@@ -74,8 +72,7 @@ class RecipeViewModel extends ChangeNotifier {
         _aiRecommendedRecipes = (data['recommendations'] as List)
             .map((r) => Recipe.fromJson(r))
             .toList();
-
-        await _fetchUserFavourites(userId); // Load user's favourites
+        await _fetchUserFavourites(userId);
       } else {
         print("Failed to get recommendations: ${response.body}");
       }
@@ -87,18 +84,16 @@ class RecipeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Fetch favourited recipe IDs for current user
+  // ========== Favourite Logic ==========
+  Set<String> _favouriteRecipeIds = {};
+
   Future<void> _fetchUserFavourites(String userId) async {
     _favouriteRecipeIds = await _firestoreService.getFavouriteRecipeIds(userId);
     notifyListeners();
   }
 
-  // Check if a recipe is favourited
-  bool isFavourite(String recipeId) {
-    return _favouriteRecipeIds.contains(recipeId);
-  }
+  bool isFavourite(String recipeId) => _favouriteRecipeIds.contains(recipeId);
 
-  // Toggle favourite status
   Future<void> toggleFavourite(Recipe recipe) async {
     final userId = _authService.userId;
     if (userId == null) return;
@@ -113,22 +108,51 @@ class RecipeViewModel extends ChangeNotifier {
       recipe.numberFavourites += 1;
     }
 
-    // Update the number of favourites in Firestore
     await _firestoreService.updateRecipeFavouriteCount(recipe.id, recipe.numberFavourites);
-
     notifyListeners();
   }
 
+  // ========== Community Recipes ==========
   List<Recipe> _allRecipes = [];
-List<Recipe> get allRecipes => _allRecipes;
-List<Recipe> get favouriteRecipes => _allRecipes.where((r) => isFavourite(r.id)).toList();
+  List<Recipe> _filteredRecipes = [];
 
-Future<void> fetchAllRecipesWithFavourites() async {
-  final userId = _authService.userId;
-  if (userId == null) return;
+  List<Recipe> get allRecipes => _filteredRecipes;
+  List<Recipe> get favouriteRecipes =>
+      _allRecipes.where((r) => isFavourite(r.id)).toList();
 
-  _allRecipes = await _firestoreService.fetchAllRecipes();
-  _favouriteRecipeIds = await _firestoreService.getFavouriteRecipeIds(userId);
-  notifyListeners();
-}
+  Future<void> fetchAllRecipesWithFavourites() async {
+    final userId = _authService.userId;
+    if (userId == null) return;
+
+    _allRecipes = await _firestoreService.fetchAllRecipes();
+    _favouriteRecipeIds = await _firestoreService.getFavouriteRecipeIds(userId);
+    _applyFilters();
+    notifyListeners();
+  }
+
+  void filterRecipes(String query) {
+    _searchQuery = query;
+    _applyFilters();
+    notifyListeners();
+  }
+
+  
+  
+  void updateSortOption(String option) {
+    _sortOption = option;
+    _applyFilters(); // apply sorting after setting new option
+    notifyListeners();
+  }
+
+  void _applyFilters() {
+    _filteredRecipes = _allRecipes.where((recipe) {
+      return recipe.dishName.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+
+    if (_sortOption == 'name') {
+      _filteredRecipes.sort((a, b) => a.dishName.compareTo(b.dishName));
+    } else if (_sortOption == 'favourites') {
+      _filteredRecipes.sort((b, a) => a.numberFavourites.compareTo(b.numberFavourites)); // Descending
+    }
+  }
 }
