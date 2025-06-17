@@ -1,15 +1,17 @@
 class Recipe {
+  final String id; // <-- Added ID field
   final String dishName;
   final String style;
   final String imageUrl;
   final String description;
   final String category;
-  final int numberFavourites;
+  int numberFavourites; // <-- Made mutable
   final String userId;
   final List<Map<String, dynamic>> ingredients;
   final List<dynamic> cookingSteps;
 
   Recipe({
+    required this.id, // <-- Added to constructor
     required this.dishName,
     required this.style,
     required this.imageUrl,
@@ -23,6 +25,7 @@ class Recipe {
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(
+      id: json['id'] ?? '', // <-- Parse the ID
       dishName: json['dish_name'] ?? '',
       style: json['style'] ?? '',
       imageUrl: json['image_url'] ?? '',
@@ -33,7 +36,7 @@ class Recipe {
       ingredients: (json['ingredients'] as List<dynamic>)
           .map((item) => item as Map<String, dynamic>)
           .toList(),
-      cookingSteps: json['cooking_steps'] ?? '',
+      cookingSteps: json['cooking_steps'] ?? [],
     );
   }
 }

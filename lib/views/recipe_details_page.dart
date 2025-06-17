@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import 'instruction_page.dart';
+import '../viewmodels/recipe_viewmodel.dart';
+import 'package:provider/provider.dart';
+
 
 class RecipeDetailsPage extends StatelessWidget {
   final Recipe recipe;
@@ -15,11 +18,17 @@ class RecipeDetailsPage extends StatelessWidget {
           // Top image section
           Stack(
             children: [
-              Image.network(
-                recipe.imageUrl,
-                height: 260,
-                width: double.infinity,
-                fit: BoxFit.cover,
+              ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32),
+                ),
+                child: Image.network(
+                  recipe.imageUrl,
+                  height: 260,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
               Positioned(
                 top: 40,
@@ -47,10 +56,22 @@ class RecipeDetailsPage extends StatelessWidget {
                     const SizedBox(width: 10),
                     CircleAvatar(
                       backgroundColor: Colors.white,
-                      child: IconButton(
-                        icon: const Icon(Icons.favorite_border),
-                        onPressed: () {},
-                      ),
+                      child: Consumer<RecipeViewModel>(
+                        builder: (context, viewModel, _) {
+                          final isFav = viewModel.isFavourite(recipe.id);
+
+                          return IconButton(
+                            icon: Icon(
+                              isFav ? Icons.favorite : Icons.favorite_border,
+                              color: isFav ? Colors.red : Colors.grey,
+                            ),
+                            onPressed: () async {
+                              await viewModel.toggleFavourite(recipe);
+                            },
+                          );
+                        },
+                      )
+,
                     ),
                   ],
                 ),
@@ -61,41 +82,55 @@ class RecipeDetailsPage extends StatelessWidget {
           // Details section
           Expanded(
             child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(32),
-                  topRight: Radius.circular(32),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    offset: Offset(0, -2),
-                  ),
-                ],
-              ),
+    
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 children: [
                   const SizedBox(height: 12),
-                  Text(recipe.dishName,
-                      style: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text(recipe.description, style: const TextStyle(color: Colors.grey)),
-                  const SizedBox(height: 2),
-                  Text("Classic ${recipe.style} recipe",
-                      style: const TextStyle(color: Colors.grey)),
-                  const SizedBox(height: 8),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.favorite, color: Colors.red, size: 18),
-                      const SizedBox(width: 4),
-                      Text("${recipe.numberFavourites} favourites",
-                          style: const TextStyle(color: Colors.grey)),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(recipe.dishName,
+                                style: const TextStyle(
+                                    fontSize: 24, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            Text(
+                              recipe.description,
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Classic ${recipe.style} recipe",
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+
+                          ],
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.favorite, color: Colors.red, size: 18),
+                          const SizedBox(width: 4),
+                          Text("${recipe.numberFavourites} favourites",
+                              style: const TextStyle(color: Colors.grey)),
+                        ],
+                      ),
                     ],
                   ),
+
 
 
                   const SizedBox(height: 16),
@@ -158,11 +193,7 @@ class RecipeDetailsPage extends StatelessWidget {
             children: [
               Text("$quantity $unit", style: const TextStyle(color: Colors.grey)),
               const SizedBox(width: 8),
-              Container(
-                decoration: const BoxDecoration(
-                    shape: BoxShape.circle, color: Colors.yellow),
-                child: const Icon(Icons.add, size: 20),
-              )
+              
             ],
           )
         ],

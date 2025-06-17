@@ -27,24 +27,25 @@ class InstructionPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-      
+            
+            const SizedBox(height: 24),
+            const Text(
+              "Manual",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
-            const SizedBox(height: 24),
-            const Text("Manual", style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-            ...recipe.cookingSteps.map((step) => Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Text("• $step", style: const TextStyle(fontSize: 16)),
-            )),
+            ...recipe.cookingSteps.map(
+              (step) => Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Text(
+                  "• $step",
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
           ],
         ),
       ),

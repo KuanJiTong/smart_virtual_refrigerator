@@ -138,4 +138,39 @@ class FirestoreService {
       return [];
     }
   }
+
+  Future<Set<String>> getFavouriteRecipeIds(String userId) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('favourites')
+        .get();
+
+    return snapshot.docs.map((doc) => doc.id).toSet();
+  }
+
+  Future<void> addToFavourites(String userId, String recipeId) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('favourites')
+        .doc(recipeId)
+        .set({});
+  }
+
+  Future<void> removeFromFavourites(String userId, String recipeId) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('favourites')
+        .doc(recipeId)
+        .delete();
+  }
+
+  Future<void> updateRecipeFavouriteCount(String recipeId, int count) async {
+    await FirebaseFirestore.instance
+        .collection('recipes')
+        .doc(recipeId)
+        .update({'number_favourites': count});
+  }
 }
