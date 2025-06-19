@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../models/recipe.dart';
-
+import 'dart:async'; 
 
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -32,6 +32,7 @@ class FirestoreService {
     required List<Map<String, String>> ingredients,
     required List<String> cookingSteps,
     required String imageUrl,
+    required String userId,
   }) async {
     final Map<String, dynamic> recipeData = {
       'dish_name': dishName,
@@ -42,6 +43,7 @@ class FirestoreService {
       'category': category,
       'number_favourites': numberFavourites,
       'image_url': imageUrl,
+      'userId': userId,
     };
 
     await _firestore.collection('recipes').add(recipeData);
@@ -227,6 +229,63 @@ class FirestoreService {
       return [];
     }
   }
+
+  Future<void> deleteRecipe(String recipeId) async {
+    await _firestore.collection('recipes').doc(recipeId).delete();
+  }
+
+  Future<void> updateRecipe({
+    required String recipeId,
+    required String dishName,
+    required String description,
+    required String style,
+    required List<Map<String, String>> ingredients,
+    required List<String> cookingSteps,
+    required String imageUrl,
+    required String category,
+  }) async {
+    await _firestore.collection('recipes').doc(recipeId).update({
+      'dish_name': dishName,
+      'description': description,
+      'style': style,
+      'ingredients': ingredients,
+      'cooking_steps': cookingSteps,
+      'image_url': imageUrl,
+      'category': category,
+    });
+  }
+
+Future<Recipe?> getRecipeById(String recipeId) async {
+  if (recipeId.isEmpty) {
+    print("❌ recipeId is empty!");
+    return null;
+  }
+
+  try {
+    final doc = await FirebaseFirestore.instance
+        .collection('recipes')
+        .doc(recipeId)
+        .get()
+        .timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw TimeoutException("Firestore request timed out.");
+          },
+        );
+
+    if (doc.exists) {
+      print("✅ Recipe found: ${doc.id}");
+      return Recipe.fromFirestore(doc.data()!, doc.id);
+    } else {
+      print("❌ Recipe not found with ID: $recipeId");
+    }
+  } catch (e) {
+    print("🔥 Error fetching recipe: $e");
+  }
+
+  return null;
+}
+
 }
 
 
