@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../models/recipe.dart';
-
+import 'dart:async'; 
 
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -213,13 +213,38 @@ class FirestoreService {
     });
   }
 
-  Future<Recipe?> getRecipeById(String recipeId) async {
-    final doc = await FirebaseFirestore.instance.collection('recipes').doc(recipeId).get();
-    if (doc.exists) {
-      return Recipe.fromFirestore(doc);
-    }
+Future<Recipe?> getRecipeById(String recipeId) async {
+  if (recipeId.isEmpty) {
+    print("❌ recipeId is empty!");
     return null;
+  }
+
+  try {
+    final doc = await FirebaseFirestore.instance
+        .collection('recipes')
+        .doc(recipeId)
+        .get()
+        .timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw TimeoutException("Firestore request timed out.");
+          },
+        );
+
+    if (doc.exists) {
+      print("✅ Recipe found: ${doc.id}");
+      return Recipe.fromFirestore(doc.data()!, doc.id);
+    } else {
+      print("❌ Recipe not found with ID: $recipeId");
+    }
+  } catch (e) {
+    print("🔥 Error fetching recipe: $e");
+  }
+
+  return null;
 }
+
+
 
 
 }

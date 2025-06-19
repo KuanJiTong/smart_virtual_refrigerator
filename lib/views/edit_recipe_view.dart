@@ -8,28 +8,30 @@ import '../viewmodels/create_recipe_viewmodel.dart';
 import 'home_page.dart';
 import '../models/recipe.dart';
 
-class CreateRecipePage extends StatelessWidget {
-  const CreateRecipePage({super.key});
+class EditRecipePage extends StatelessWidget {
+  final Recipe recipe;
+
+  const EditRecipePage({super.key, required this.recipe});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => CreateRecipeViewModel(),
+      create: (_) => CreateRecipeViewModel(editRecipe: recipe),
       builder: (context, child) {
-        return const _CreateRecipePageBody(); // ✅ context now includes the provider
+        return const _EditRecipePageBody();
       },
     );
   }
 }
 
-class _CreateRecipePageBody extends StatefulWidget {
-  const _CreateRecipePageBody();
+class _EditRecipePageBody extends StatefulWidget {
+  const _EditRecipePageBody();
 
   @override
-  State<_CreateRecipePageBody> createState() => _CreateRecipePageBodyState();
+  State<_EditRecipePageBody> createState() => _EditRecipePageBodyState();
 }
 
-class _CreateRecipePageBodyState extends State<_CreateRecipePageBody> {
+class _EditRecipePageBodyState extends State<_EditRecipePageBody> {
   final _formKey = GlobalKey<FormState>();
 
   void _showImageSourceDialog(CreateRecipeViewModel viewModel) {
@@ -65,7 +67,7 @@ class _CreateRecipePageBodyState extends State<_CreateRecipePageBody> {
     return Consumer<CreateRecipeViewModel>(
       builder: (context, vm, _) {
         return Scaffold(
-          appBar: AppBar(title: const Text("Create Recipe")),
+          appBar: AppBar(title: const Text("Edit Recipe")),
           body: Stack(
             children: [
               Form(
@@ -76,19 +78,25 @@ class _CreateRecipePageBodyState extends State<_CreateRecipePageBody> {
                     Center(
                       child: vm.pickedImage != null
                           ? Image.file(vm.pickedImage!, height: 150)
-                          : Container(
-                        height: 150,
-                        width: 150,
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.add_a_photo, size: 50),
-                      ),
+                          : Image.network(
+                              vm.imageUrl,
+                              height: 150,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  height: 150,
+                                  width: 150,
+                                  color: Colors.grey[300],
+                                  child: const Icon(Icons.broken_image, size: 50),
+                                );
+                              },
+                            ),
                     ),
                     const SizedBox(height: 8),
                     Center(
                       child: ElevatedButton.icon(
                         onPressed: () => _showImageSourceDialog(vm),
                         icon: const Icon(Icons.upload),
-                        label: const Text("Upload Image"),
+                        label: const Text("Change Image"),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -203,24 +211,21 @@ class _CreateRecipePageBodyState extends State<_CreateRecipePageBody> {
 
                         final success = await vm.submitRecipe(_formKey);
 
-                        if (!context.mounted) return;
+                        if (!mounted) return;
 
                         if (success) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Recipe created successfully')),
+                            const SnackBar(content: Text("Recipe updated successfully")),
                           );
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (_) => const HomePage(initialIndex: 1)),
-                          );
+                          Navigator.pop(context, true);
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Failed to create recipe.')),
+                            const SnackBar(content: Text("Failed to update recipe.")),
                           );
                         }
                       },
 
-                      child: const Text("Submit Recipe"),
+                      child: const Text("Update Recipe"),
                     ),
                   ],
                 ),

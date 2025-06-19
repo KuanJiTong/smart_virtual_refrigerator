@@ -92,66 +92,63 @@ class CreateRecipeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> submitRecipe(BuildContext context, GlobalKey<FormState> formKey) async {
-    if (!formKey.currentState!.validate()) return;
+Future<bool> submitRecipe(GlobalKey<FormState> formKey) async {
+  if (!formKey.currentState!.validate()) return false;
 
-    isLoading = true;
-    notifyListeners();
+  isLoading = true;
+  notifyListeners();
 
-    try {
-      final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+  try {
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-      // Upload new image if picked
-      String finalImageUrl = imageUrl;
-      if (pickedImage != null) {
-        finalImageUrl = await _storageService.uploadIngredientImage(pickedImage!);
-      }
-
-      final List<Map<String, String>> formattedIngredients = ingredients.map((i) => {
-        'name': (i['name'] as TextEditingController).text.trim(),
-        'quantity': (i['quantity'] as TextEditingController).text.trim(),
-        'unit': i['unit'].toString(),
-      }).toList();
-
-      final List<String> formattedCookingSteps =
-          cookingSteps.map((c) => c.text.trim()).toList();
-
-      // Save to Firestore
-      if (recipeId.isNotEmpty) {
-        // Update
-        await _firestoreService.updateRecipe(
-          recipeId: recipeId,
-          dishName: nameController.text.trim(),
-          description: descriptionController.text.trim(),
-          style: styleController.text.trim(),
-          ingredients: formattedIngredients,
-          cookingSteps: formattedCookingSteps,
-          imageUrl: finalImageUrl,
-          category: selectedCategory,
-        );
-      } else {
-        // Create new
-        await _firestoreService.addRecipe(
-          dishName: nameController.text.trim(),
-          description: descriptionController.text.trim(),
-          style: styleController.text.trim(),
-          ingredients: formattedIngredients,
-          cookingSteps: formattedCookingSteps,
-          imageUrl: finalImageUrl,
-          category: selectedCategory,
-          numberFavourites: 0,
-          userId: userId,
-        );
-      }
-
-      Navigator.pop(context, true);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to submit recipe: $e")),
-      );
-    } finally {
-      isLoading = false;
-      notifyListeners();
+    // Upload image if changed
+    String finalImageUrl = imageUrl;
+    if (pickedImage != null) {
+      finalImageUrl = await _storageService.uploadIngredientImage(pickedImage!);
     }
+
+    final List<Map<String, String>> formattedIngredients = ingredients.map((i) => {
+      'name': (i['name'] as TextEditingController).text.trim(),
+      'quantity': (i['quantity'] as TextEditingController).text.trim(),
+      'unit': i['unit'].toString(),
+    }).toList();
+
+    final List<String> formattedCookingSteps =
+        cookingSteps.map((c) => c.text.trim()).toList();
+
+    if (recipeId.isNotEmpty) {
+      await _firestoreService.updateRecipe(
+        recipeId: recipeId,
+        dishName: nameController.text.trim(),
+        description: descriptionController.text.trim(),
+        style: styleController.text.trim(),
+        ingredients: formattedIngredients,
+        cookingSteps: formattedCookingSteps,
+        imageUrl: finalImageUrl,
+        category: selectedCategory,
+      );
+    } else {
+      await _firestoreService.addRecipe(
+        dishName: nameController.text.trim(),
+        description: descriptionController.text.trim(),
+        style: styleController.text.trim(),
+        ingredients: formattedIngredients,
+        cookingSteps: formattedCookingSteps,
+        imageUrl: finalImageUrl,
+        category: selectedCategory,
+        numberFavourites: 0,
+        userId: userId,
+      );
+    }
+
+    return true;
+  } catch (e) {
+    debugPrint("🔥 Error submitting recipe: $e");
+    return false;
+  } finally {
+    isLoading = false;
+    notifyListeners();
   }
+}
+
 }
