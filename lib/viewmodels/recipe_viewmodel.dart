@@ -155,4 +155,9 @@ class RecipeViewModel extends ChangeNotifier {
       _filteredRecipes.sort((b, a) => a.numberFavourites.compareTo(b.numberFavourites)); // Descending
     }
   }
+  List<Recipe> get userRecipes {
+    final userId = _authService.userId;
+    return _allRecipes.where((recipe) => recipe.userId == userId).toList();
+  }
+
 }

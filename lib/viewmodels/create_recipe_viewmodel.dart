@@ -4,6 +4,8 @@ import 'package:image_picker/image_picker.dart';
 
 import '../services/firestore_service.dart';
 import '../services/storage_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class CreateRecipeViewModel extends ChangeNotifier {
   final nameController = TextEditingController();
@@ -90,6 +92,9 @@ class CreateRecipeViewModel extends ChangeNotifier {
 
       final List<String> formattedCookingSteps = cookingSteps.map((c) => c.text.trim()).toList();
 
+      // ✅ Fetch current user ID
+      final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
       await _firestoreService.addRecipe(
         dishName: nameController.text.trim(),
         description: descriptionController.text.trim(),
@@ -99,6 +104,7 @@ class CreateRecipeViewModel extends ChangeNotifier {
         imageUrl: imageUrl,
         category: selectedCategory,
         numberFavourites: 0,
+        userId: userId, // ✅ Include the userId
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -110,5 +116,6 @@ class CreateRecipeViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
 
 }

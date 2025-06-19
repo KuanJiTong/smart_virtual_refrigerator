@@ -111,6 +111,107 @@ class RecipeCommunityPage extends StatelessWidget {
                         },
                       ),
                     ),
+
+                  const SizedBox(height: 24),
+Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    const Text(
+      'Your Recipes',
+      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+    ),
+    IconButton(
+      icon: const Icon(Icons.refresh),
+      onPressed: () {
+        Provider.of<RecipeViewModel>(context, listen: false)
+            .fetchAllRecipesWithFavourites();
+      },
+    ),
+  ],
+),
+const SizedBox(height: 12),
+Consumer<RecipeViewModel>(
+  builder: (context, vm, _) {
+    final userRecipes = vm.userRecipes;
+
+    if (userRecipes.isEmpty) {
+      return const Text('You haven’t created any recipes yet.');
+    }
+
+    return SizedBox(
+      height: 220,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: userRecipes.length,
+        itemBuilder: (context, index) {
+          final recipe = userRecipes[index];
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RecipeDetailsPage(recipe: recipe),
+                ),
+              );
+            },
+            child: Container(
+              width: 180,
+              margin: const EdgeInsets.only(right: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 5,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(12)),
+                    child: Image.network(
+                      recipe.imageUrl.isNotEmpty
+                          ? recipe.imageUrl
+                          : 'https://via.placeholder.com/180x100',
+                      height: 100,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      recipe.dishName,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      '${recipe.numberFavourites} favourites',
+                      style:
+                          const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  },
+),
+  
                     
                   const SizedBox(height: 24),
                   const Text(

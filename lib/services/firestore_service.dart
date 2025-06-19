@@ -32,6 +32,7 @@ class FirestoreService {
     required List<Map<String, String>> ingredients,
     required List<String> cookingSteps,
     required String imageUrl,
+    required String userId,
   }) async {
     final Map<String, dynamic> recipeData = {
       'dish_name': dishName,
@@ -42,6 +43,7 @@ class FirestoreService {
       'category': category,
       'number_favourites': numberFavourites,
       'image_url': imageUrl,
+      'userId': userId,
     };
 
     await _firestore.collection('recipes').add(recipeData);
