@@ -5,6 +5,8 @@ import 'package:smart_virtual_refrigerator/viewmodels/recipe_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/views/create_recipe_view.dart';
 import 'recipe_details_page.dart';
 import '../models/recipe.dart';
+import 'favourited_recipes_page.dart';
+import 'your_recipes_page.dart';
 
 
 class RecipeCommunityPage extends StatelessWidget {
@@ -92,11 +94,41 @@ class RecipeCommunityPage extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 24),
-                  const Text(
-                    'Your Favorited Recipes',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Your Favorited Recipes',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            '${bookmarkedRecipes.length} recipes',
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          if (bookmarkedRecipes.length > 3)
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => FavouritedRecipesPage(recipes: bookmarkedRecipes),
+                                  ),
+                                );
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.black,
+                              ),
+                              child: const Text('View All'),
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
+
                   const SizedBox(height: 12),
+
                   if (bookmarkedRecipes.isEmpty)
                     const Text('No favourites yet.')
                   else
@@ -120,9 +152,38 @@ class RecipeCommunityPage extends StatelessWidget {
                         'Your Recipes',
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                       ),
-                      
+                      Consumer<RecipeViewModel>(
+                        builder: (context, vm, _) {
+                          final userRecipes = vm.userRecipes;
+                          return Row(
+                            children: [
+                              Text(
+                                '${userRecipes.length} recipes',
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                              if (userRecipes.length > 3)
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => YourRecipesPage(recipes: userRecipes),
+                                      ),
+                                    );
+                                  },
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.black,
+                                  ),
+                                  child: const Text('View All'),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
                     ],
                   ),
+
+
                   const SizedBox(height: 12),
                   Consumer<RecipeViewModel>(
                     builder: (context, vm, _) {
