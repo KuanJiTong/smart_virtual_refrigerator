@@ -90,7 +90,7 @@ class _RecipeDetailsPageState extends State<RecipeDetailsPage> {
                           final selected = await showDialog<List<Map<String, dynamic>>>(
                             context: context,
                             builder: (context) {
-                              final List<bool> checked = List.generate(recipe.ingredients.length, (_) => true);
+                              final List<bool> checked = List.generate(widget.recipe.ingredients.length, (_) => true);
                               return StatefulBuilder(
                                 builder: (context, setState) {
                                   return AlertDialog(
@@ -99,9 +99,9 @@ class _RecipeDetailsPageState extends State<RecipeDetailsPage> {
                                       width: double.maxFinite,
                                       child: ListView.builder(
                                         shrinkWrap: true,
-                                        itemCount: recipe.ingredients.length,
+                                        itemCount: widget.recipe.ingredients.length,
                                         itemBuilder: (context, idx) {
-                                          final ing = recipe.ingredients[idx];
+                                          final ing = widget.recipe.ingredients[idx];
                                           return CheckboxListTile(
                                             value: checked[idx],
                                             onChanged: (val) {
@@ -121,8 +121,8 @@ class _RecipeDetailsPageState extends State<RecipeDetailsPage> {
                                       ElevatedButton(
                                         onPressed: () {
                                           final selectedIngredients = <Map<String, dynamic>>[];
-                                          for (int i = 0; i < recipe.ingredients.length; i++) {
-                                            if (checked[i]) selectedIngredients.add(recipe.ingredients[i]);
+                                          for (int i = 0; i < widget.recipe.ingredients.length; i++) {
+                                            if (checked[i]) selectedIngredients.add(widget.recipe.ingredients[i]);
                                           }
                                           Navigator.pop(context, selectedIngredients);
                                         },
