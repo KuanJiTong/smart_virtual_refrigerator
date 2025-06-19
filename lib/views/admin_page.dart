@@ -132,7 +132,7 @@ class AdminHomePage extends StatelessWidget {
 
     try {
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:5000/retrain'),
+        Uri.parse('https://smart-virtual-refridgerator-ai.onrender.com/retrain'),
       );
 
       navigator.pop(); // Remove the loading dialog
