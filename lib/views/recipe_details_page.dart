@@ -3,6 +3,9 @@ import '../models/recipe.dart';
 import 'instruction_page.dart';
 import '../viewmodels/recipe_viewmodel.dart';
 import 'package:provider/provider.dart';
+import 'create_recipe_view.dart'; 
+import '../viewmodels/create_recipe_viewmodel.dart';
+
 
 
 class RecipeDetailsPage extends StatelessWidget {
@@ -12,7 +15,11 @@ class RecipeDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userId = Provider.of<RecipeViewModel>(context, listen: false).authService.userId;
+    final isOwner = recipe.userId == userId;
+
     bool updated = false; 
+
     return Scaffold(
       body: Column(
         children: [
@@ -49,6 +56,7 @@ class RecipeDetailsPage extends StatelessWidget {
                 right: 20,
                 child: Row(
                   children: [
+                    // Shopping Cart Icon
                     CircleAvatar(
                       backgroundColor: Colors.white,
                       child: IconButton(
@@ -57,12 +65,13 @@ class RecipeDetailsPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
+
+                    // Favourite Icon
                     CircleAvatar(
                       backgroundColor: Colors.white,
                       child: Consumer<RecipeViewModel>(
                         builder: (context, viewModel, _) {
                           final isFav = viewModel.isFavourite(recipe.id);
-                         
                           return IconButton(
                             icon: Icon(
                               isFav ? Icons.favorite : Icons.favorite_border,
@@ -74,12 +83,31 @@ class RecipeDetailsPage extends StatelessWidget {
                             },
                           );
                         },
-                      )
-,
+                      ),
                     ),
+                    const SizedBox(width: 10),
+
+                    // Edit/Delete PopupMenu
+                    if (isOwner)
+                      CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: IconButton(
+                          icon: const Icon(Icons.more_vert),
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                              ),
+                              builder: (_) => _buildEditDeleteSheet(context),
+                            );
+                          },
+                        ),
+                      ),
                   ],
                 ),
               ),
+
             ],
           ),
 
@@ -204,4 +232,66 @@ class RecipeDetailsPage extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildEditDeleteSheet(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            const Text('Manage Recipe', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+
+            ListTile(
+              leading: const Icon(Icons.edit, color: Colors.blue),
+              title: const Text('Edit Recipe'),
+              onTap: () async {
+                Navigator.pop(context); // Close sheet first
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChangeNotifierProvider(
+                      create: (_) => CreateRecipeViewModel(editRecipe: recipe),
+                      child: const CreateRecipePage(),
+                    ),
+
+                  ),
+                );
+                if (result == true && context.mounted) {
+                  Navigator.pop(context, true); // Pass update flag
+                }
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text('Delete Recipe'),
+              onTap: () async {
+                Navigator.pop(context); // Close sheet first
+                final confirm = await showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text("Confirm Delete"),
+                    content: const Text("Are you sure you want to delete this recipe?"),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Cancel")),
+                      TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text("Delete")),
+                    ],
+                  ),
+                );
+
+                if (confirm == true && context.mounted) {
+                  await Provider.of<RecipeViewModel>(context, listen: false)
+                      .deleteRecipe(recipe.id, recipe.imageUrl);
+                  Navigator.pop(context, true);
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 }

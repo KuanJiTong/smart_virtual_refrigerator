@@ -187,6 +187,41 @@ class FirestoreService {
       return Recipe.fromJson(data);
     }).toList();
   }
+
+  Future<void> deleteRecipe(String recipeId) async {
+    await _firestore.collection('recipes').doc(recipeId).delete();
+  }
+
+  Future<void> updateRecipe({
+    required String recipeId,
+    required String dishName,
+    required String description,
+    required String style,
+    required List<Map<String, String>> ingredients,
+    required List<String> cookingSteps,
+    required String imageUrl,
+    required String category,
+  }) async {
+    await _firestore.collection('recipes').doc(recipeId).update({
+      'dish_name': dishName,
+      'description': description,
+      'style': style,
+      'ingredients': ingredients,
+      'cooking_steps': cookingSteps,
+      'image_url': imageUrl,
+      'category': category,
+    });
+  }
+
+  Future<Recipe?> getRecipeById(String recipeId) async {
+    final doc = await FirebaseFirestore.instance.collection('recipes').doc(recipeId).get();
+    if (doc.exists) {
+      return Recipe.fromFirestore(doc);
+    }
+    return null;
+}
+
+
 }
 
 

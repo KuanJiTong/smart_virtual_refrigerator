@@ -4,12 +4,16 @@ import 'package:http/http.dart' as http;
 import '../models/recipe.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
+import '../services/storage_service.dart';
+
 
 class RecipeViewModel extends ChangeNotifier {
   final FirestoreService _firestoreService = FirestoreService();
   final AuthService _authService = AuthService();
   String _sortOption = 'name'; // default
   String get sortOption => _sortOption;
+  final StorageService _storageService = StorageService();
+  AuthService get authService => _authService;
 
   List<Map<String, dynamic>> _ingredients = [];
   bool isLoading = false;
@@ -158,6 +162,12 @@ class RecipeViewModel extends ChangeNotifier {
   List<Recipe> get userRecipes {
     final userId = _authService.userId;
     return _allRecipes.where((recipe) => recipe.userId == userId).toList();
+  }
+
+  Future<void> deleteRecipe(String recipeId, String imageUrl) async {
+    await _firestoreService.deleteRecipe(recipeId);
+    await _storageService.deleteImageByUrl(imageUrl);
+    await fetchAllRecipesWithFavourites();
   }
 
 }

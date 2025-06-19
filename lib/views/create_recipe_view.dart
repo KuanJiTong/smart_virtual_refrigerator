@@ -6,16 +6,15 @@ import 'package:provider/provider.dart';
 
 import '../viewmodels/create_recipe_viewmodel.dart';
 import 'home_page.dart';
+import '../models/recipe.dart';
 
 class CreateRecipePage extends StatelessWidget {
   const CreateRecipePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => CreateRecipeViewModel(),
-      child: const _CreateRecipePageBody(),
-    );
+    // Just return the body, because provider is already wrapped above
+    return const _CreateRecipePageBody();
   }
 }
 
