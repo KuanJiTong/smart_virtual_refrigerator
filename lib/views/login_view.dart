@@ -215,7 +215,7 @@ class LoginViewState extends State<LoginView> {
                                       if (isAdmin) {
                                         Navigator.pushReplacement(
                                           context,
-                                          MaterialPageRoute(builder: (_) => const SignupView()),
+                                          MaterialPageRoute(builder: (_) => const AdminHomePage()),
                                         );
                                       } else {
                                         Navigator.pushReplacement(

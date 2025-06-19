@@ -26,6 +26,7 @@ class _GroceryListViewState extends State<GroceryListView> {
         final boughtItems = items.where((item) => item.bought).toList();
         return Scaffold(
           appBar: AppBar(
+            automaticallyImplyLeading: false,
             title: const Text('Grocery List'),
             actions: [
               IconButton(
@@ -50,7 +51,7 @@ class _GroceryListViewState extends State<GroceryListView> {
                             direction: DismissDirection.endToStart,
                             background: Container(
                               decoration: BoxDecoration(
-                                color: Colors.red,
+                                color: const Color(0xFFE85C5C),
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               alignment: Alignment.centerRight,
@@ -124,7 +125,7 @@ class _GroceryListViewState extends State<GroceryListView> {
                               direction: DismissDirection.endToStart,
                               background: Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.red,
+                                  color: const Color(0xFFE85C5C),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 alignment: Alignment.centerRight,
@@ -195,7 +196,20 @@ class _GroceryListViewState extends State<GroceryListView> {
                String name = '';
                 String quantity = '';
                 String unit = '';
-                final units = ['g', 'ml', 'pcs', 'cup', 'unit'];
+                final units = [
+                  'Gram',
+                  'Milliliter',
+                  'Slice',
+                  'Piece',
+                  'Tablespoon',
+                  'Cup',
+                  'Teaspoon',
+                  'Stalk',
+                  'Clove',
+                  'Inch',
+                  'Whole',
+                  'Unit'
+                ];
                 await showDialog(
                   context: context,
                   builder: (context) {

@@ -5,9 +5,12 @@ import 'package:smart_virtual_refrigerator/viewmodels/ingredient_viewmodel.dart'
 import 'package:smart_virtual_refrigerator/viewmodels/leftover_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/login_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/profile_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/views/expiring_notifications_page.dart';
 import 'package:smart_virtual_refrigerator/views/profile_view.dart';
 import 'package:smart_virtual_refrigerator/views/recipe_community_page.dart';
 import 'package:smart_virtual_refrigerator/views/recipe_details_page.dart';
+import 'package:smart_virtual_refrigerator/views/settings_view.dart';
+import '../viewmodels/notification_viewmodel.dart';
 import '../views/login_view.dart';
 import 'fridge_page.dart'; // Make sure this path is correct
 import 'package:smart_virtual_refrigerator/viewmodels/recipe_viewmodel.dart';
@@ -33,7 +36,7 @@ class _HomePageState extends State<HomePage> {
     RecipeCommunityPage(),
     const FridgePage(),
     const GroceryListView(),
-    const Center(child: Text('Settings')),
+    const SettingsPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -110,9 +113,22 @@ class _HomeBodyState extends State<_HomeBody> {
     if (!_hasFetchedData) {
       final signout = Provider.of<LoginViewModel>(context, listen: false);
       final userId = signout.user?.uid ?? "";
-      Provider.of<IngredientViewModel>(context, listen: false).fetchIngredients(userId);
+      final ingredientVM = Provider.of<IngredientViewModel>(context, listen: false);
+      final leftoverVM = Provider.of<LeftoverViewModel>(context, listen: false);
+      final notificationVM = Provider.of<NotificationViewModel>(context, listen: false);
+
+      ingredientVM.fetchIngredients(userId);
+      leftoverVM.fetchLeftovers();
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notificationVM.generateNotifications(
+          ingredientVM.ingredients,
+          leftoverVM.leftovers,
+        );
+      });
+
       Provider.of<RecipeViewModel>(context, listen: false).fetchAIRecommendations();
-      Provider.of<LeftoverViewModel>(context, listen: false).fetchLeftovers();
+
       _hasFetchedData = true;
     }
   }
@@ -566,7 +582,12 @@ class _HomeBodyState extends State<_HomeBody> {
             ),
             child: IconButton(
               icon: const Icon(Icons.notifications_none),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ExpiringNotificationsPage()),
+                );
+              },
             ),
           )
         ],

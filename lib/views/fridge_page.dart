@@ -3,6 +3,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_virtual_refrigerator/utils/popup.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/leftover_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/views/expiring_notifications_page.dart';
 import 'package:smart_virtual_refrigerator/views/update_ingredients_view.dart';
 import 'package:smart_virtual_refrigerator/views/add_leftover_view.dart';
 import 'package:smart_virtual_refrigerator/views/update_leftover_view.dart';
@@ -75,7 +76,12 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
               ),
               child: IconButton(
                 icon: const Icon(Icons.notifications_none),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => ExpiringNotificationsPage()),
+                  );
+                },
               ),
           )
         ],
@@ -275,8 +281,6 @@ class _FridgeViewBodyState extends State<FridgeViewBody> {
               ),
             ),
       floatingActionButton: SpeedDial(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
         icon: Icons.add,
         activeIcon: Icons.close,
         spacing: 12,
