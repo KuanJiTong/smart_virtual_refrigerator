@@ -120,13 +120,7 @@ class RecipeCommunityPage extends StatelessWidget {
                         'Your Recipes',
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.refresh),
-                        onPressed: () {
-                          Provider.of<RecipeViewModel>(context, listen: false)
-                              .fetchAllRecipesWithFavourites();
-                        },
-                      ),
+                      
                     ],
                   ),
                   const SizedBox(height: 12),
