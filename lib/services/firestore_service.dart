@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../models/recipe.dart';
-
+import 'dart:async'; 
 
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -188,6 +188,48 @@ class FirestoreService {
     }).toList();
   }
 
+    Future<void> addGrocery({
+    required String userId,
+    required Map<String, dynamic> groceryData,
+  }) async {
+    groceryData['userId'] = userId;
+    await _firestore.collection('groceries').add(groceryData);
+  }
+
+  Future<void> deleteGrocery(String docId) async {
+    try {
+      await _firestore.collection('groceries').doc(docId).delete();
+    } catch (e) {
+      print('Error deleting grocery: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updateGrocery({
+    required String docId,
+    required Map<String, dynamic> groceryData,
+  }) async {
+    await _firestore.collection('groceries').doc(docId).update(groceryData);
+  }
+
+  Future<List<Map<String, dynamic>>> fetchGroceries(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('groceries')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    } catch (e) {
+      print('Error fetching groceries: $e');
+      return [];
+    }
+  }
+
   Future<void> deleteRecipe(String recipeId) async {
     await _firestore.collection('recipes').doc(recipeId).delete();
   }
@@ -213,14 +255,36 @@ class FirestoreService {
     });
   }
 
-  Future<Recipe?> getRecipeById(String recipeId) async {
-    final doc = await FirebaseFirestore.instance.collection('recipes').doc(recipeId).get();
-    if (doc.exists) {
-      return Recipe.fromFirestore(doc);
-    }
+Future<Recipe?> getRecipeById(String recipeId) async {
+  if (recipeId.isEmpty) {
+    print("❌ recipeId is empty!");
     return null;
-}
+  }
 
+  try {
+    final doc = await FirebaseFirestore.instance
+        .collection('recipes')
+        .doc(recipeId)
+        .get()
+        .timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw TimeoutException("Firestore request timed out.");
+          },
+        );
+
+    if (doc.exists) {
+      print("✅ Recipe found: ${doc.id}");
+      return Recipe.fromFirestore(doc.data()!, doc.id);
+    } else {
+      print("❌ Recipe not found with ID: $recipeId");
+    }
+  } catch (e) {
+    print("🔥 Error fetching recipe: $e");
+  }
+
+  return null;
+}
 
 }
 

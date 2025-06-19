@@ -39,4 +39,22 @@ class Recipe {
       cookingSteps: json['cooking_steps'] ?? [],
     );
   }
+
+  factory Recipe.fromFirestore(Map<String, dynamic> data, String id) {
+  return Recipe(
+    id: id,
+    dishName: data['dish_name'] ?? '',
+    description: data['description'] ?? '',
+    style: data['style'] ?? '',
+    category: data['category'] ?? '',
+    imageUrl: data['image_url'] ?? '',
+    userId: data['userId'] ?? '',
+    ingredients: List<Map<String, dynamic>>.from(data['ingredients'] ?? []),
+    cookingSteps: List<String>.from(data['cooking_steps']?.cast<String>() ?? []),
+    numberFavourites: data['number_favourites'] ?? 0,
+  );
+}
+
+
+
 }
