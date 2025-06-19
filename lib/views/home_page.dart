@@ -147,21 +147,6 @@ class _HomeBodyState extends State<_HomeBody> {
           child: ListView(
             children: [
               _buildHeader(context),
-              const SizedBox(height: 20),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search recipe',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                onChanged: (value) {
-                  Provider.of<RecipeViewModel>(context, listen: false)
-                      .updateSearch(value);
-                },
-              ),
-              const SizedBox(height: 16),
               Consumer<RecipeViewModel>(
                 builder: (context, recipeVM, child) {
                   return SingleChildScrollView(
