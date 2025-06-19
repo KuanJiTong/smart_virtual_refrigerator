@@ -188,6 +188,48 @@ class FirestoreService {
     }).toList();
   }
 
+    Future<void> addGrocery({
+    required String userId,
+    required Map<String, dynamic> groceryData,
+  }) async {
+    groceryData['userId'] = userId;
+    await _firestore.collection('groceries').add(groceryData);
+  }
+
+  Future<void> deleteGrocery(String docId) async {
+    try {
+      await _firestore.collection('groceries').doc(docId).delete();
+    } catch (e) {
+      print('Error deleting grocery: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updateGrocery({
+    required String docId,
+    required Map<String, dynamic> groceryData,
+  }) async {
+    await _firestore.collection('groceries').doc(docId).update(groceryData);
+  }
+
+  Future<List<Map<String, dynamic>>> fetchGroceries(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('groceries')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    } catch (e) {
+      print('Error fetching groceries: $e');
+      return [];
+    }
+  }
+
   Future<void> deleteRecipe(String recipeId) async {
     await _firestore.collection('recipes').doc(recipeId).delete();
   }
@@ -243,9 +285,6 @@ Future<Recipe?> getRecipeById(String recipeId) async {
 
   return null;
 }
-
-
-
 
 }
 
