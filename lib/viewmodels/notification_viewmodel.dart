@@ -14,9 +14,17 @@ class NotificationViewModel extends ChangeNotifier {
 
   List<ExpiringNotification> get notifications => _notifications;
 
-  /// Load stored notifications on app start
+  /// Load stored notifications from SharedPreferences, only if notifications are enabled
   Future<void> loadStoredNotifications() async {
     final prefs = await SharedPreferences.getInstance();
+    final notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
+
+    if (!notificationsEnabled) {
+      _notifications.clear();
+      notifyListeners();
+      return;
+    }
+
     final jsonList = prefs.getStringList(_notificationsKey) ?? [];
     _notifications.clear();
     _notifications.addAll(jsonList.map((e) => ExpiringNotification.fromJson(json.decode(e))));
@@ -58,8 +66,11 @@ class NotificationViewModel extends ChangeNotifier {
     await prefs.setStringList(_shownKeysKey, keys.toList());
   }
 
-  /// Call this instead of directly adding a notification
+  /// Add a single notification, respecting enabled status
   Future<void> addNotification(ExpiringNotification notification) async {
+    final enabled = await _areNotificationsEnabled();
+    if (!enabled) return;
+
     final key = _generateKey(notification.title, notification.message);
     final shownKeys = await _getShownNotificationKeys();
     if (!shownKeys.contains(key)) {
@@ -74,6 +85,7 @@ class NotificationViewModel extends ChangeNotifier {
     }
   }
 
+  /// Generate all notifications (ingredients + leftovers), only if notifications are enabled
   Future<void> generateNotifications(
       List<Ingredient> ingredients, List<Leftover> leftovers) async {
     final now = DateTime.now();
@@ -131,7 +143,7 @@ class NotificationViewModel extends ChangeNotifier {
     }
   }
 
-  /// Removes a notification from memory and storage
+  /// Remove a specific notification and update stored keys
   Future<void> removeNotification(int index) async {
     if (index < 0 || index >= _notifications.length) return;
     final removed = _notifications.removeAt(index);
@@ -141,13 +153,12 @@ class NotificationViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Clear all notifications and stored keys
   Future<void> clearAllNotifications() async {
     _notifications.clear();
     final prefs = await SharedPreferences.getInstance();
-
-    // Remove saved notification keys
-    await prefs.remove('shownNotificationKeys');
-
+    await prefs.remove(_shownKeysKey);
+    await prefs.remove(_notificationsKey);
     notifyListeners();
   }
 }
