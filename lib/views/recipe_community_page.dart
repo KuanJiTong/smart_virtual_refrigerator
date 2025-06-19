@@ -93,7 +93,7 @@ class RecipeCommunityPage extends StatelessWidget {
 
                   const SizedBox(height: 24),
                   const Text(
-                    'Your Bookmarked Recipes',
+                    'Your Favorited Recipes',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
