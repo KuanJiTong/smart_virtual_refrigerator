@@ -20,6 +20,7 @@ import '../viewmodels/signup_viewmodel.dart';
 import '../viewmodels/login_viewmodel.dart';
 import '../viewmodels/recipe_viewmodel.dart';
 import '../viewmodels/ingredient_viewmodel.dart';
+import '../viewmodels/grocery_viewmodel.dart';
 
 import '../views/login_view.dart'; 
 import '../views/fridge_page.dart'; 
@@ -92,6 +93,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => IngredientViewModel()),
         ChangeNotifierProvider(create: (_) => LeftoverViewModel()),
         ChangeNotifierProvider(create: (_) => RecipeViewModel()),
+        ChangeNotifierProvider(create: (_) => GroceryListViewModel()),
       ],
       child: MaterialApp(
         title: 'Smart Virtual Refrigerator',

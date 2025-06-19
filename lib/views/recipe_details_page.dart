@@ -3,11 +3,13 @@ import '../models/recipe.dart';
 import 'instruction_page.dart';
 import '../viewmodels/recipe_viewmodel.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/grocery_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/grocery_viewmodel.dart';
+import '../models/grocery.dart';
 import 'create_recipe_view.dart';
 import '../viewmodels/create_recipe_viewmodel.dart';
 import '../services/firestore_service.dart';
 import 'edit_recipe_view.dart';
-
 
 class RecipeDetailsPage extends StatefulWidget {
   final Recipe recipe;
@@ -84,7 +86,70 @@ class _RecipeDetailsPageState extends State<RecipeDetailsPage> {
                       backgroundColor: Colors.white,
                       child: IconButton(
                         icon: const Icon(Icons.shopping_cart_outlined),
-                        onPressed: () {},
+                           onPressed: () async {
+                          final selected = await showDialog<List<Map<String, dynamic>>>(
+                            context: context,
+                            builder: (context) {
+                              final List<bool> checked = List.generate(widget.recipe.ingredients.length, (_) => true);
+                              return StatefulBuilder(
+                                builder: (context, setState) {
+                                  return AlertDialog(
+                                    title: const Text('Add Ingredients to Grocery List'),
+                                    content: SizedBox(
+                                      width: double.maxFinite,
+                                      child: ListView.builder(
+                                        shrinkWrap: true,
+                                        itemCount: widget.recipe.ingredients.length,
+                                        itemBuilder: (context, idx) {
+                                          final ing = widget.recipe.ingredients[idx];
+                                          return CheckboxListTile(
+                                            value: checked[idx],
+                                            onChanged: (val) {
+                                              setState(() => checked[idx] = val ?? false);
+                                            },
+                                            title: Text(ing['name'] ?? ''),
+                                            subtitle: Text('${ing['quantity'] ?? ''} ${ing['unit'] ?? ''}'),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context, null),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          final selectedIngredients = <Map<String, dynamic>>[];
+                                          for (int i = 0; i < widget.recipe.ingredients.length; i++) {
+                                            if (checked[i]) selectedIngredients.add(widget.recipe.ingredients[i]);
+                                          }
+                                          Navigator.pop(context, selectedIngredients);
+                                        },
+                                        child: const Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                          );
+                          if (selected != null && selected.isNotEmpty) {
+                            final groceryVM = Provider.of<GroceryListViewModel>(context, listen: false);
+                            final items = selected.map((ing) => Grocery(
+                              name: ing['name'] ?? '',
+                              quantity: ing['quantity']?.toString() ?? '',
+                              unit: ing['unit'] ?? '',
+                              source: 'recipe',
+                              imageUrl: null,
+                              expiryDate: null,
+                            )).toList();
+                            groceryVM.addItems(items);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Added ${selected.length} ingredient(s) to grocery list!')),
+                            );
+                          }
+                        },
                       ),
                     ),
                     const SizedBox(width: 10),

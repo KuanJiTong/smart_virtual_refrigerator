@@ -12,6 +12,9 @@ import '../views/login_view.dart';
 import 'fridge_page.dart'; // Make sure this path is correct
 import 'package:smart_virtual_refrigerator/viewmodels/recipe_viewmodel.dart';
 import '../views/login_view.dart';
+import 'package:smart_virtual_refrigerator/views/grocery_view.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/grocery_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/models/leftover.dart';
 
 class HomePage extends StatefulWidget {
   final int initialIndex;
@@ -29,7 +32,7 @@ class _HomePageState extends State<HomePage> {
     const _HomeBody(),
     RecipeCommunityPage(),
     const FridgePage(),
-    const Center(child: Text('Cart')),
+    const GroceryListView(),
     const Center(child: Text('Settings')),
   ];
 
@@ -48,7 +51,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
+       return Scaffold(
       backgroundColor: const Color(0xFFFBFCFE),
       body: SafeArea(
         child: _pages[_selectedIndex],
@@ -401,30 +404,85 @@ class _HomeBodyState extends State<_HomeBody> {
                   final String image = item['image'] as String? ?? '';
                   final DateTime expiry = item['expiry'] as DateTime; 
                   final String type = item['type'] as String? ?? '';
+                  final String quantity = item['quantity'] as String? ?? '';
                   
-                  return Container(
-                    width: 120,
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8F8F8),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Image
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            image,
-                            width: double.infinity,
-                            height: 70,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.image),
-                          ),
+                     return GestureDetector(
+                    onTap: () async {
+                      final shouldAdd = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Add to Grocery List?'),
+                          content: Text('Do you want to add "$name" to your grocery list?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancel'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Add'),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 4),
+                      );
+                      if (shouldAdd == true) {
+                        final groceryVM = Provider.of<GroceryListViewModel>(context, listen: false);
+                        if (type == 'ingredient') {
+                          Ingredient? ingredient;
+                          try {
+                            ingredient = ingredientVM.expiringSoonIngredients.firstWhere((i) => i.name == name && i.quantity == quantity && i.expiredDate == expiry);
+                          } catch (_) {
+                            ingredient = null;
+                          }
+                          if (ingredient != null) {
+                            groceryVM.addExpiringIngredient(ingredient);
+                          }
+                        } else if (type == 'leftover') {
+                          Leftover? leftover;
+                          try {
+                            leftover = leftoverVM.expiringSoonLeftovers.firstWhere((l) => l.name == name && l.quantity.toString() == quantity && l.expiryDate == expiry);
+                          } catch (_) {
+                            leftover = null;
+                          }
+                          if (leftover != null) {
+                            groceryVM.addExpiringLeftover(leftover);
+                          }
+                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Added "$name" to grocery list!')),
+                        );
+                      }
+                    },
+                    child: Container(
+                      width: 120,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8F8F8),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Image (not tappable)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                              child: image.isNotEmpty
+                                ? Image.network(
+                                    image,
+                                    width: double.infinity,
+                                    height: 70,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        const Icon(Icons.image),
+                                  )
+                                : Container(
+                                    width: double.infinity,
+                                    height: 70,
+                                    color: Colors.grey[300],
+                                    child: const Icon(Icons.image_not_supported),
+                                  ),
+                          ),
+                          const SizedBox(height: 4),
 
                         // Name
                         Text(
@@ -449,9 +507,10 @@ class _HomeBodyState extends State<_HomeBody> {
                             style: const TextStyle(
                               fontSize: 12,
                               color: Colors.grey,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   },
