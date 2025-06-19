@@ -118,8 +118,7 @@ class GroceryListViewModel extends ChangeNotifier {
       expiryDate: ingredient.expiredDate,
     );
     if (!_groceryList.any((g) => g.name == item.name && g.source == 'ingredient')) {
-      _groceryList.add(item);
-      notifyListeners();
+      addItem(item);
     }
   }
 
@@ -133,8 +132,7 @@ class GroceryListViewModel extends ChangeNotifier {
       expiryDate: leftover.expiryDate,
     );
     if (!_groceryList.any((g) => g.name == item.name && g.source == 'leftover')) {
-      _groceryList.add(item);
-      notifyListeners();
+       addItem(item);
     }
   }
 

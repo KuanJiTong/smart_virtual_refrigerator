@@ -13,22 +13,11 @@ class GroceryListView extends StatefulWidget {
 }
 
 class _GroceryListViewState extends State<GroceryListView> {
-  bool _hasFetched = false;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_hasFetched) {
-      final groceryVM = Provider.of<GroceryListViewModel>(context, listen: false);
-      groceryVM.fetchGroceries();
-      _hasFetched = true;
-    }
-  }
-
-
-
-  @override
-  Widget build(BuildContext context) {
+   Widget build(BuildContext context) {
+    final groceryVM = Provider.of<GroceryListViewModel>(context, listen: false);
+    groceryVM.fetchGroceries();
     return Consumer<GroceryListViewModel>(
       builder: (context, groceryVM, _) {
         final items = groceryVM.groceryList;
