@@ -162,7 +162,7 @@ class _RecipeDetailsPageState extends State<RecipeDetailsPage> {
                           return IconButton(
                             icon: Icon(
                               isFav ? Icons.favorite : Icons.favorite_border,
-                              color: isFav ? Colors.red : Colors.grey,
+                              color: isFav ? const Color(0xFFE85C5C) : Colors.grey,
                             ),
                             onPressed: () async {
                               await viewModel.toggleFavourite(_currentRecipe);
@@ -236,7 +236,7 @@ class _RecipeDetailsPageState extends State<RecipeDetailsPage> {
                     ),
                     Row(
                       children: [
-                        const Icon(Icons.favorite, color: Colors.red, size: 18),
+                        const Icon(Icons.favorite, color: const Color(0xFFE85C5C), size: 18),
                         const SizedBox(width: 4),
                         Text("${_currentRecipe.numberFavourites} favourites",
                             style: const TextStyle(color: Colors.grey)),
@@ -301,7 +301,7 @@ class _RecipeDetailsPageState extends State<RecipeDetailsPage> {
             const Text('Manage Recipe', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.edit, color: Colors.blue),
+              leading: const Icon(Icons.edit, color: Colors.black),
               title: const Text('Edit Recipe'),
               onTap: () async {
                 Navigator.pop(context); // Close sheet
@@ -321,7 +321,7 @@ class _RecipeDetailsPageState extends State<RecipeDetailsPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
+              leading: const Icon(Icons.delete, color: const Color(0xFFE85C5C)),
               title: const Text('Delete Recipe'),
               onTap: () async {
                 Navigator.pop(context);

@@ -1,3 +1,4 @@
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:smart_virtual_refrigerator/viewmodels/add_ingredients_viewmodel.
 import 'package:smart_virtual_refrigerator/viewmodels/admin_dashboard_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/forgot_password_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/fridge_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/notification_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/update_ingredients_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/leftover_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/profile_viewmodel.dart';
@@ -29,8 +31,17 @@ import '../views/login_view.dart';
 import '../views/fridge_page.dart'; 
 import '../views/home_page.dart'; 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../services/notification_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
+
+Future<void> requestNotificationPermission() async {
+  if (await Permission.notification.isDenied) {
+    await Permission.notification.request();
+  }
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +52,8 @@ Future<void> main() async {
   } catch (e) {
     print('Could not load .env: $e');
   }
-
+  await NotificationService.init();
+  await requestNotificationPermission();
   runApp(const MyApp());
 }
 
@@ -97,6 +109,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => LeftoverViewModel()),
         ChangeNotifierProvider(create: (_) => RecipeViewModel()),
         ChangeNotifierProvider(create: (_) => GroceryListViewModel()),
+        ChangeNotifierProvider(create: (_) => NotificationViewModel()),
         ChangeNotifierProvider(create: (_) => AdminDashboardViewModel()),
       ],
       child: MaterialApp(
@@ -231,6 +244,14 @@ class _MyAppState extends State<MyApp> {
             contentTextStyle: TextStyle(color: Colors.black, fontSize: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          floatingActionButtonTheme: const FloatingActionButtonThemeData(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(100)),
             ),
           ),
 
