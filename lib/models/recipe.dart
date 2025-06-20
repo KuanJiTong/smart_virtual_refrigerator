@@ -9,6 +9,8 @@ class Recipe {
   final String userId;
   final List<Map<String, dynamic>> ingredients;
   final List<dynamic> cookingSteps;
+  final String status;
+  String? rejectionReason; 
 
   Recipe({
     required this.id, // <-- Added to constructor
@@ -21,6 +23,8 @@ class Recipe {
     required this.userId,
     required this.ingredients,
     required this.cookingSteps,
+    required this.status,
+    this.rejectionReason
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
@@ -37,6 +41,8 @@ class Recipe {
           .map((item) => item as Map<String, dynamic>)
           .toList(),
       cookingSteps: json['cooking_steps'] ?? [],
+      status: json['status'] ?? '',
+      rejectionReason: json['rejection_reason'] ?? '',
     );
   }
 
@@ -52,6 +58,8 @@ class Recipe {
     ingredients: List<Map<String, dynamic>>.from(data['ingredients'] ?? []),
     cookingSteps: List<String>.from(data['cooking_steps']?.cast<String>() ?? []),
     numberFavourites: data['number_favourites'] ?? 0,
+    status: data['status'] ?? '',
+    rejectionReason: data['rejection_reason'] ?? '',
   );
 }
 

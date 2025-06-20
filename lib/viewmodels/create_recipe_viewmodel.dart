@@ -138,6 +138,7 @@ Future<bool> submitRecipe(GlobalKey<FormState> formKey) async {
         category: selectedCategory,
         numberFavourites: 0,
         userId: userId,
+        status: 'pending'
       );
     }
 
