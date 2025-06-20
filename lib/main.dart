@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_virtual_refrigerator/models/leftover.dart';
+import 'package:smart_virtual_refrigerator/services/admin_dashboard_service.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/add_ingredients_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/admin_dashboard_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/forgot_password_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/fridge_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/update_ingredients_viewmodel.dart';
@@ -10,6 +12,7 @@ import 'package:smart_virtual_refrigerator/viewmodels/leftover_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/viewmodels/profile_viewmodel.dart';
 import 'package:smart_virtual_refrigerator/views/add_ingredients_barcode_view.dart';
 import 'package:smart_virtual_refrigerator/views/add_ingredients_view.dart';
+import 'package:smart_virtual_refrigerator/views/admin_page.dart';
 import 'package:smart_virtual_refrigerator/views/signup_view.dart';
 
 import 'package:smart_virtual_refrigerator/views/home_page.dart';
@@ -94,6 +97,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => LeftoverViewModel()),
         ChangeNotifierProvider(create: (_) => RecipeViewModel()),
         ChangeNotifierProvider(create: (_) => GroceryListViewModel()),
+        ChangeNotifierProvider(create: (_) => AdminDashboardViewModel()),
       ],
       child: MaterialApp(
         title: 'Smart Virtual Refrigerator',
@@ -237,7 +241,7 @@ class _MyAppState extends State<MyApp> {
         ),
         debugShowCheckedModeBanner: false,
 
-        home: _isLoggedIn ? const HomePage() : const LoginView(),
+        home: _isLoggedIn ? const AdminHomePage() : const LoginView(),
 
 
       ),

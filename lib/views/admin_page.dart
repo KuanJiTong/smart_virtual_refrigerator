@@ -1,20 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:smart_virtual_refrigerator/viewmodels/admin_dashboard_viewmodel.dart';
+import 'package:smart_virtual_refrigerator/views/create_recipe_view.dart';
+import 'package:smart_virtual_refrigerator/views/review_pending_recipe_page.dart';
 
 import '../viewmodels/login_viewmodel.dart';
 import 'login_view.dart';
 
-class AdminHomePage extends StatelessWidget {
+class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
 
   @override
+  _AdminHomePageState createState() => _AdminHomePageState();
+}
+
+class _AdminHomePageState extends State<AdminHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      Provider.of<AdminDashboardViewModel>(context, listen: false).loadDashboardStats();
+    });
+  }
+
+
+  @override
   Widget build(BuildContext context) {
-    final stats = {
-      'Users': 145,
-      'Recipes': 320,
-      'Pending Recipes': 7,
-    };
     final signout = Provider.of<LoginViewModel>(context, listen: false);
 
     return Scaffold(
@@ -52,20 +64,36 @@ class AdminHomePage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 1.2,
-                children: stats.entries.map((entry) {
-                  return _buildStatCard(entry.key, entry.value.toString());
-                }).toList(),
+              child: Consumer<AdminDashboardViewModel>(
+                builder: (context, adminDashboard, _) {
+                  final stats = {
+                    'Users': adminDashboard.totalUsers,
+                    'Recipes': adminDashboard.totalRecipes,
+                    'Pending Recipes': adminDashboard.totalPendingRecipes,
+                  };
+
+                  return GridView.count(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 1.2,
+                    children: stats.entries.map((entry) {
+                      return _buildStatCard(entry.key, entry.value.toString());
+                    }).toList(),
+                  );
+                },
               ),
             ),
+
             const SizedBox(height: 10),
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.pushNamed(context, '/approveRecipes');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ReviewPendingRecipePage(),
+                  ),
+                );
               },
               icon: const Icon(Icons.check_circle_outline),
               label: const Text('Review Pending Recipes'),
@@ -74,7 +102,12 @@ class AdminHomePage extends StatelessWidget {
             const SizedBox(height: 10),
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.pushNamed(context, '/createRecipe');
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const CreateRecipePage()),
+                  );
+                });
               },
               icon: const Icon(Icons.add_circle_outline),
               label: const Text('Add New Community Recipe'),

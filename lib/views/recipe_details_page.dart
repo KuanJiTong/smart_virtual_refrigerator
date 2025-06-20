@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_virtual_refrigerator/services/auth_service.dart';
 import '../models/recipe.dart';
 import 'instruction_page.dart';
 import '../viewmodels/recipe_viewmodel.dart';

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -63,16 +64,48 @@ class AuthService {
     return _firebaseAuth.currentUser?.uid;
   }
 
+  // Future<bool> isCurrentUserAdmin() async {
+  //   User? user = _firebaseAuth.currentUser;
+
+  //   if (user != null) {
+  //     IdTokenResult tokenResult = await user.getIdTokenResult(true); // Force refresh
+  //     final claims = tokenResult.claims;
+  //     print("admin");
+  //     return claims?['admin'] == true;
+  //   }
+  //   print("test");
+  //   return false;
+  // }
+
+
   Future<bool> isCurrentUserAdmin() async {
     User? user = _firebaseAuth.currentUser;
-
     if (user != null) {
-      IdTokenResult tokenResult = await user.getIdTokenResult(true); // Force refresh
+      final tokenResult = await user.getIdTokenResult(true);
       final claims = tokenResult.claims;
-      print("admin");
-      return claims?['admin'] == true;
+      final isAdmin = claims?['admin'] == true;
+
+      // ✅ Write to Firestore for backend visibility
+      await FirebaseFirestore.instance.collection('admin_check_logs').add({
+        'uid': user.uid,
+        'email': user.email,
+        'isAdmin': isAdmin,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      return isAdmin;
     }
-    print("test");
+
+    // Log failed check as well
+    await FirebaseFirestore.instance.collection('admin_check_logs').add({
+      'uid': null,
+      'email': null,
+      'isAdmin': false,
+      'timestamp': FieldValue.serverTimestamp(),
+      'error': 'User is null',
+    });
+
     return false;
   }
+
 }
