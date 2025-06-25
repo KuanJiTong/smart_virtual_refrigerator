@@ -7,6 +7,7 @@ import 'recipe_details_page.dart';
 import '../models/recipe.dart';
 import 'favourited_recipes_page.dart';
 import 'your_recipes_page.dart';
+import '../viewmodels/user_viewmodel.dart';
 
 
 class RecipeCommunityPage extends StatelessWidget {
@@ -14,8 +15,11 @@ class RecipeCommunityPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => RecipeViewModel()..fetchAllRecipesWithFavourites(),
+    return MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => RecipeViewModel()..fetchAllRecipesWithFavourites()),
+      ChangeNotifierProvider(create: (_) => UserViewModel()..fetchAllUsers()),
+    ],
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Community Recipes'),
@@ -205,7 +209,7 @@ class RecipeCommunityPage extends StatelessWidget {
                     },
                   ),
 
-
+                  
                     
                   const SizedBox(height: 24),
                   const Text(
@@ -213,43 +217,50 @@ class RecipeCommunityPage extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
-                  if (communityRecipes.isEmpty)
-                    const Text('No community recipes found.')
-                  else
-                    Column(
-                      children: communityRecipes.map((recipe) {
-                        return ListTile(
-                          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                          leading: SizedBox(
-                            width: 60,
-                            height: 60,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                recipe.imageUrl.isNotEmpty ? recipe.imageUrl : 'https://via.placeholder.com/60',
-                                fit: BoxFit.cover,
+                  Builder(
+                    builder: (context) {
+                      final userViewModel = Provider.of<UserViewModel>(context);
+                      if (communityRecipes.isEmpty) {
+                        return const Text('No community recipes found.');
+                      } else {
+                        return Column(
+                          children: communityRecipes.map((recipe) {
+                            final userName = userViewModel.getUserName(recipe.userId);
+                            return ListTile(
+                              contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                              leading: SizedBox(
+                                width: 60,
+                                height: 60,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    recipe.imageUrl.isNotEmpty ? recipe.imageUrl : 'https://via.placeholder.com/60',
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          title: Text(recipe.dishName),
-                          subtitle: Text('Shared by ${recipe.userId}'),
-                          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                          onTap: () async {
-                            final updated = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => RecipeDetailsPage(recipe: recipe),
-                              ),
-                            );
+                              title: Text(recipe.dishName),
+                              subtitle: Text('Shared by $userName'),
+                              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                              onTap: () async {
+                                final updated = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => RecipeDetailsPage(recipe: recipe),
+                                  ),
+                                );
 
-                            if (updated == true) {
-                              // Refresh recipes
-                              Provider.of<RecipeViewModel>(context, listen: false).fetchAllRecipesWithFavourites();
-                            }
-                          },
+                                if (updated == true) {
+                                  Provider.of<RecipeViewModel>(context, listen: false).fetchAllRecipesWithFavourites();
+                                }
+                              },
+                            );
+                          }).toList(),
                         );
-                      }).toList(),
-                    ),
+                      }
+                    },
+                  ),
+
                 ],
               ),
             );
