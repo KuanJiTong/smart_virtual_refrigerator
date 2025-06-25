@@ -42,7 +42,7 @@ class Recipe {
           .toList(),
       cookingSteps: json['cooking_steps'] ?? [],
       status: json['status'] ?? '',
-      rejectionReason: json['rejection_reason'] ?? '',
+      rejectionReason: json['rejectReason'] ?? '',
     );
   }
 
@@ -59,7 +59,7 @@ class Recipe {
     cookingSteps: List<String>.from(data['cooking_steps']?.cast<String>() ?? []),
     numberFavourites: data['number_favourites'] ?? 0,
     status: data['status'] ?? '',
-    rejectionReason: data['rejection_reason'] ?? '',
+    rejectionReason: data['rejectReason'] ?? '',
   );
 }
 

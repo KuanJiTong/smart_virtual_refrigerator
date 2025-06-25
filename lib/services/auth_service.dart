@@ -64,48 +64,16 @@ class AuthService {
     return _firebaseAuth.currentUser?.uid;
   }
 
-  // Future<bool> isCurrentUserAdmin() async {
-  //   User? user = _firebaseAuth.currentUser;
-
-  //   if (user != null) {
-  //     IdTokenResult tokenResult = await user.getIdTokenResult(true); // Force refresh
-  //     final claims = tokenResult.claims;
-  //     print("admin");
-  //     return claims?['admin'] == true;
-  //   }
-  //   print("test");
-  //   return false;
-  // }
-
-
   Future<bool> isCurrentUserAdmin() async {
     User? user = _firebaseAuth.currentUser;
+
     if (user != null) {
-      final tokenResult = await user.getIdTokenResult(true);
+      IdTokenResult tokenResult = await user.getIdTokenResult(true); // Force refresh
       final claims = tokenResult.claims;
-      final isAdmin = claims?['admin'] == true;
-
-      // ✅ Write to Firestore for backend visibility
-      await FirebaseFirestore.instance.collection('admin_check_logs').add({
-        'uid': user.uid,
-        'email': user.email,
-        'isAdmin': isAdmin,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      return isAdmin;
+      print("admin");
+      return claims?['admin'] == true;
     }
-
-    // Log failed check as well
-    await FirebaseFirestore.instance.collection('admin_check_logs').add({
-      'uid': null,
-      'email': null,
-      'isAdmin': false,
-      'timestamp': FieldValue.serverTimestamp(),
-      'error': 'User is null',
-    });
-
+    print("test");
     return false;
   }
-
 }

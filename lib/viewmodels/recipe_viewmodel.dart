@@ -150,8 +150,9 @@ class RecipeViewModel extends ChangeNotifier {
 
   void _applyFilters() {
     _filteredRecipes = _allRecipes.where((recipe) {
-      return recipe.dishName.toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
+  return recipe.dishName.toLowerCase().contains(_searchQuery.toLowerCase()) &&
+         recipe.status.toLowerCase() == 'approved';
+}).toList();
 
     if (_sortOption == 'name') {
       _filteredRecipes.sort((a, b) => a.dishName.compareTo(b.dishName));
