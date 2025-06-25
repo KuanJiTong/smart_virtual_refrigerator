@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_virtual_refrigerator/viewmodels/user_viewmodel.dart';
 import '../models/recipe.dart';
 import '../viewmodels/admin_dashboard_viewmodel.dart';
 import 'recipe_details_page.dart'; // Reuse your detail page
@@ -23,10 +24,16 @@ class _ReviewPendingRecipePageState extends State<ReviewPendingRecipePage> {
 
     final vm = Provider.of<AdminDashboardViewModel>(context, listen: false);
 
-    return Scaffold(
+    return MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => UserViewModel()..fetchAllUsers())
+    ],
+    
+    child: Scaffold(
       appBar: AppBar(title: const Text('Review Pending Recipes')),
       body: Consumer<AdminDashboardViewModel>(
         builder: (context, vm, _) {
+          final userViewModel = Provider.of<UserViewModel>(context);
           if (vm.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -38,6 +45,7 @@ class _ReviewPendingRecipePageState extends State<ReviewPendingRecipePage> {
           return ListView(
             padding: const EdgeInsets.all(12),
             children: vm.pendingRecipes.map((recipe) {
+                        final userName = userViewModel.getUserName(recipe.userId);
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 6),
                 elevation: 3,
@@ -55,7 +63,7 @@ class _ReviewPendingRecipePageState extends State<ReviewPendingRecipePage> {
                     ),
                   ),
                   title: Text(recipe.dishName),
-                  subtitle: Text('Shared by ${recipe.userId}'),
+                  subtitle: Text('Shared by $userName'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -95,34 +103,60 @@ class _ReviewPendingRecipePageState extends State<ReviewPendingRecipePage> {
           );
         },
       ),
+    )
     );
   }
 
   Future<String?> _showRejectDialog(BuildContext context) async {
     final controller = TextEditingController();
+    String? errorText;
+
     return showDialog<String>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Reject Reason'),
-        content: TextField(
-          controller: controller,
-          maxLines: 3,
-          decoration: const InputDecoration(
-            hintText: 'Enter reason for rejection...',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: const Text('Cancel'),
-            onPressed: () => Navigator.pop(context),
-          ),
-          ElevatedButton(
-            child: const Text('Reject'),
-            onPressed: () => Navigator.pop(context, controller.text),
-          ),
-        ],
-      ),
+      barrierDismissible: false,
+      builder: (_) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Reject Reason'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: controller,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: 'Enter reason for rejection...',
+                      border: const OutlineInputBorder(),
+                      errorText: errorText,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                ElevatedButton(
+                  child: const Text('Reject'),
+                  onPressed: () {
+                    final reason = controller.text.trim();
+                    if (reason.isEmpty) {
+                      setState(() {
+                        errorText = 'Reason cannot be empty';
+                      });
+                    } else {
+                      Navigator.pop(context, reason);
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
+
 }

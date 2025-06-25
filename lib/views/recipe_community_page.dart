@@ -141,7 +141,7 @@ class RecipeCommunityPage extends StatelessWidget {
                         itemCount: bookmarkedRecipes.length,
                         itemBuilder: (context, index) {
                           final recipe = bookmarkedRecipes[index];
-                          return _recipeCard(context, recipe);
+                          return _recipeCard(context, recipe,false);
                         },
                       ),
                     ),
@@ -202,7 +202,7 @@ class RecipeCommunityPage extends StatelessWidget {
                           itemCount: userRecipes.length,
                           itemBuilder: (context, index) {
                             final recipe = userRecipes[index];
-                            return _recipeCard(context, recipe); // ✅ reuse the same card UI
+                            return _recipeCard(context, recipe,true); // ✅ reuse the same card UI
                           },
                         ),
                       );
@@ -270,7 +270,7 @@ class RecipeCommunityPage extends StatelessWidget {
     );
   }
 
-  Widget _recipeCard(BuildContext context, Recipe recipe) {
+  Widget _recipeCard(BuildContext context, Recipe recipe, bool yourRecipe) {
     return GestureDetector(
       onTap: () async {
         final updated = await Navigator.push(
@@ -285,9 +285,11 @@ class RecipeCommunityPage extends StatelessWidget {
         }
       },
       child: Container(
-        width: 140,
-        margin: const EdgeInsets.only(right: 12),
-        child: Column(
+    width: 140,
+    margin: const EdgeInsets.only(right: 12),
+    child: Stack(
+      children: [
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
@@ -306,6 +308,52 @@ class RecipeCommunityPage extends StatelessWidget {
               recipe.dishName,
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+        if(yourRecipe)
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: () {
+              if (recipe.status == 'rejected') {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Recipe Rejected'),
+                    content: Text(recipe.rejectionReason!),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            },
+            child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(recipe.status),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (recipe.status == 'rejected') ...[
+                        const Icon(Icons.error_outline, size: 14, color: Colors.white),
+                        const SizedBox(width: 4),
+                      ],
+                      Text(
+                        capitalizeFirstLetter(recipe.status),
+                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -393,6 +441,25 @@ class RecipeCommunityPage extends StatelessWidget {
     ),
   );
 }
+
+Color _getStatusColor(String status) {
+  switch (status) {
+    case 'approved':
+      return Colors.green;
+    case 'pending':
+      return Colors.orange;
+    case 'rejected':
+      return Colors.red;
+    default:
+      return Colors.grey;
+  }
+}
+
+String capitalizeFirstLetter(String text) {
+  if (text.isEmpty) return text;
+  return text[0].toUpperCase() + text.substring(1).toLowerCase();
+}
+
 
 
 

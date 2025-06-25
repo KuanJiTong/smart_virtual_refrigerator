@@ -40,42 +40,60 @@ class _InstructionPageState extends State<InstructionPage> {
   void _showRejectionDialog() {
     final TextEditingController _reasonController = TextEditingController();
     final vm = Provider.of<AdminDashboardViewModel>(context, listen: false);
+    String? errorText;
 
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
-        return AlertDialog(
-          title: const Text("Reject Recipe"),
-          content: TextField(
-            controller: _reasonController,
-            decoration: const InputDecoration(
-              hintText: "Enter rejection reason",
-            ),
-            maxLines: 3,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); 
-              },
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                String reason = _reasonController.text.trim();
-                if (reason.isNotEmpty) {
-                  Navigator.of(context).pop(); 
-                  vm.rejectRecipe(widget.recipe.id,reason);
-                  _handleSuccess("Recipe rejected successfully.");
-                }
-              },
-              child: const Text("Submit"),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Reject Recipe"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _reasonController,
+                    decoration: InputDecoration(
+                      hintText: "Enter rejection reason",
+                      errorText: errorText, // <-- error message shown here
+                    ),
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    String reason = _reasonController.text.trim();
+                    if (reason.isEmpty) {
+                      setState(() {
+                        errorText = "Reason cannot be empty"; // <-- trigger error
+                      });
+                    } else {
+                      Navigator.of(context).pop();
+                      vm.rejectRecipe(widget.recipe.id, reason);
+                      _handleSuccess("Recipe rejected successfully.");
+                    }
+                  },
+                  child: const Text("Submit"),
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
+
+
 
   @override
   Widget build(BuildContext context) {

@@ -68,12 +68,56 @@ class YourRecipesPage extends StatelessWidget {
                         'Style: ${recipe.style}',
                         style: const TextStyle(fontSize: 12),
                       ),
+                      const SizedBox(height: 4),
+                      GestureDetector(
+                        onTap: () {
+                          if (recipe.status.toLowerCase() == 'rejected') {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Recipe Rejected'),
+                                content: Text(recipe.rejectionReason!),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(),
+                                    child: const Text('OK'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: _getStatusColor(recipe.status),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (recipe.status.toLowerCase() == 'rejected') ...[
+                                const Icon(Icons.error_outline, size: 12, color: Colors.white),
+                                const SizedBox(width: 4),
+                              ],
+                              Text(
+                                capitalizeFirstLetter(recipe.status),
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 const Icon(Icons.arrow_forward_ios, size: 16),
               ],
-            ),
+            )
           );
         },
       ),
@@ -88,4 +132,23 @@ class YourRecipesPage extends StatelessWidget {
       child: const Icon(Icons.image_not_supported, size: 40),
     );
   }
+
+  Color _getStatusColor(String status) {
+  switch (status.toLowerCase()) {
+    case 'approved':
+      return Colors.green;
+    case 'pending':
+      return Colors.orange;
+    case 'rejected':
+      return Colors.red;
+    default:
+      return Colors.grey;
+  }
+}
+
+  String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1).toLowerCase();
+  }
+
 }
