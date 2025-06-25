@@ -162,7 +162,7 @@ class _CreateRecipePageBodyState extends State<_CreateRecipePageBody> {
                             items: vm.quantityUnits.map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
+                            icon: const Icon(Icons.delete, color: const Color(0xFFE85C5C)),
                             onPressed: () => vm.removeIngredient(i),
                           ),
                         ],
@@ -190,7 +190,7 @@ class _CreateRecipePageBodyState extends State<_CreateRecipePageBody> {
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
+                            icon: const Icon(Icons.delete, color: const Color(0xFFE85C5C)),
                             onPressed: () => vm.removeCookingStep(i),
                           ),
                         ],

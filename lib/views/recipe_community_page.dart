@@ -26,8 +26,6 @@ class RecipeCommunityPage extends StatelessWidget {
           automaticallyImplyLeading: false,
         ),
         floatingActionButton: SpeedDial(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
           icon: Icons.add,
           activeIcon: Icons.close,
           spacing: 12,
