@@ -462,6 +462,7 @@ class _HomeBodyState extends State<_HomeBody> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Image (not tappable)
@@ -471,14 +472,14 @@ class _HomeBodyState extends State<_HomeBody> {
                                 ? Image.network(
                                     image,
                                     width: double.infinity,
-                                    height: 70,
+                                    height: 60,
                                     fit: BoxFit.cover,
                                     errorBuilder: (context, error, stackTrace) =>
                                         const Icon(Icons.image),
                                   )
                                 : Container(
                                     width: double.infinity,
-                                    height: 70,
+                                    height: 60,
                                     color: Colors.grey[300],
                                     child: const Icon(Icons.image_not_supported),
                                   ),
@@ -490,7 +491,7 @@ class _HomeBodyState extends State<_HomeBody> {
                           name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                         ),
 
                         Text(
@@ -506,7 +507,7 @@ class _HomeBodyState extends State<_HomeBody> {
                        Text(
                             '${expiry.difference(DateTime.now()).inDays} day(s) left',
                             style: const TextStyle(
-                              fontSize: 12,
+                              fontSize: 11,
                               color: Colors.grey,
                               ),
                             ),
